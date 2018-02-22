@@ -1,4 +1,4 @@
-No.,Sample Material,Temperature Range,Pressure Range,Diffusing Species,Ea (kJ/mol) or D (m2/s),D0 (m2/s),pO2: fH2O,Orientation,Method,Reference,Notes
+No.,Sample Material,Temperature,Pressure,Diff. Species,Ea,D0,pO2: fH2O,Orientation,Method,Reference,Notes
 1,alpha-Quartz: natural powder,1010-1220,<0.1,18O/O2,230,3.70 E-13,O2,bulk,BE-MS,Haul & Dumbgen (1962),
 2,beta-Quartz: natural single Xal,667,82,18O/H2O,4.1 E-16,,,para c,18O(p:a)15N,Choudhury et al. (1965),
 3,beta-Quartz: natural single Xal,667,82,18O/H2O,8.4 E-18,,,perp c,18O(p:a)15N,Choudhury et al. (1965),
