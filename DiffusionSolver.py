@@ -12,10 +12,14 @@ fonts = 12
 titlefonts = ("Helvetica", 10)
 fonts1 = ("helvetica", 11)
 fonts2 = ("ariel", 12, "bold")
+monofont1 = ("consolas",12)
+monofont2 = ("consolas",12,"underline")
+
 brs = ("Hevetica", 10)
 runcmnds = ("Helvetica", 9)
 background1 = '#c5ddeb'
 bkgr2 = "white"
+
 
 
 
@@ -280,11 +284,11 @@ def diff_search(but_num):
                 #create same length option lines
                 opt = ['' for x in mat]
 
-                optlist=[0,1,3,9,11,24]
+                optlist=[1,2,3,4]
                 for j in optlist:
                     optadd = [diffdata[x][j] for x in mat]
                     lengths = [len(x) for x in opt]
-                    maxl = max(lengths) + 1+7*(j>0)
+                    maxl = max(lengths)+1+2*(j>1)
 
                     opt = [opt[x] + ' ' * (maxl - len(opt[x])) + optadd[x] for x in range(0, len(opt))]
                     if j == optlist[-1]:
@@ -292,11 +296,16 @@ def diff_search(but_num):
                         maxl=max(lengths)+1
                         opt = [opt[x]+' '*(maxl-len(opt[x])) for x in range(0,len(opt))]
 
-                for i in range(0, min(25,size(mat))):
-                    possible_options[i+1].set(opt[i])
-                    Possible_options[i+1].bind('<Button-1>', lambda event, i=i: final_options(mat[i]))
+                for i in range(0, min(25,size(mat)-1)):
+                    possible_options[i+1].set(opt[i+1])
+                    Possible_options[i+1].bind('<Button-1>', lambda event, i=i: final_options(mat[i+1]))
                 #after buttons have been made final options, adjust number of buttons
                 readjust_diff(min(20, size(mat)))
+
+                #place header
+                Diffheader=Label(mainwin, text=opt[0], font=monofont2, bg=background1)
+                Diffheader.grid(row=3, pady=(20,0))
+
             else:
                 final_options(0)
 
@@ -305,7 +314,7 @@ def diff_search(but_num):
     # add or removed unused options
     def readjust_diff(num):
         for i in range(1, num + 1):
-            Possible_options[i].grid(row=i+3, column=0, pady=(20*(i<2),10-10*(i<num)), padx=(8,8))
+            Possible_options[i].grid(row=i+3, column=0, pady=(5*(i<2),10-10*(i<num)), padx=(8,8), sticky=W)
         for i in range(num + 1, 26):
             Possible_options[i].grid_remove()
         #if num>0:
@@ -321,9 +330,9 @@ def diff_search(but_num):
 
     #search for mineral name in table
     def find_in_table(min_name):
-        matches = []
-        for i in range(0, len(diffdata)):
-            if str(min_name) in diffdata[i][0]:
+        matches = [0]
+        for i in range(0, len(diffdata)-1):
+            if str(min_name.upper()) in diffdata[i][1].upper():
                 matches.append(i)
         return matches
 
@@ -352,7 +361,7 @@ def diff_search(but_num):
         possible_options[i] = StringVar(mainwin)
         possible_options[i].set('Option'+str(i))
         Possible_options[i] = Label(mainwin, textvariable=possible_options[i], relief="groove")
-        Possible_options[i].config(font=titlefonts, bg=background1)
+        Possible_options[i].config(font=monofont1, bg=background1)
 
     for i in range(1,26):
         Possible_options[i].bind('<Button-1>', lambda event, i=i: choose_opt(i))
@@ -380,16 +389,14 @@ def diff_search(but_num):
         direc.config(text='Please give mineral name to search for diffusion parameters.')
 
 
-
-#load diffusion for table lookup
-a=os.path.dirname(sys.argv[0])
-a=a+'/DiffusionR.txt'
-
+#load diffusion CSV
+a='ODiffusionR.csv'
 file = open(a, 'r')
-#file = open('C:/Users/gabe_/Documents/PyCharm/Diffusion.csv', 'r')
 raw=file.read()
 rawlines=raw.split('\n')
 diffdata=[x.split(',') for x in rawlines]
+diffdata=[[x.replace(':',',') for x in y] for y in diffdata]
+diffdata=(diffdata[0:1]+[(y[0:2]+[x.replace(' ','') for x in y[2:]]) for y in diffdata[1:]])
 
 
 ### Creation Block for popup GUI (end)###
