@@ -246,24 +246,24 @@ def diff_search(but_num):
 
     #used for last selection to pull values from table
     def set_diff_params(num):
-        rocks[but_num][9].set(exp(float(diffdata[num][9])))
-        rocks[but_num][10].set(float(diffdata[num][11]))
+        Ea=diffdata[num][5]
+        if len(Ea)>0:
+            rocks[but_num][10].set(float(Ea))
+        else:
+            rocks[but_num][10].set(0)
+        rocks[but_num][9].set(1000*float(diffdata[num][6]))
         mainwin.destroy()
 
 
     #used after conversions and table search has been done.
     def final_options(num):
-
+        Diffheader.grid_remove()
         if num>0:
             readjust_diff(1)
             direc.config(text="Would you like to use your current selection or enter manually?")
-            possible_options[1].set('Use current selection')
+            possible_options[1].set('Use Current Selection')
             Possible_options[1].bind('<Button-1>', lambda event: set_diff_params(num))
-            #use_curr = Button(mainwin, text="Use Current Selection", relief='groove', bg=background1)
-            #use_curr.bind('<Button-1>', lambda event: set_diff_params(num))
-            #use_curr.grid(row=3, column=0)
-            #ent_man = Button(mainwin, text="Enter Manually (not recommended)", relief='groove', bg=background1)
-            #ent_man.grid(row=4, column=0)
+
         else:
             direc.config(text="I could not find any table entries for this mineral.")
             readjust_diff(0)
@@ -281,10 +281,11 @@ def diff_search(but_num):
             mat = find_in_table(curr_min)
             if len(mat)>0:
                 direc.config(text="I have the following table entries for this mineral:")
+
                 #create same length option lines
                 opt = ['' for x in mat]
 
-                optlist=[1,2,3,4]
+                optlist=[1,2,3,4,5,6,8,10]
                 for j in optlist:
                     optadd = [diffdata[x][j] for x in mat]
                     lengths = [len(x) for x in opt]
@@ -296,15 +297,19 @@ def diff_search(but_num):
                         maxl=max(lengths)+1
                         opt = [opt[x]+' '*(maxl-len(opt[x])) for x in range(0,len(opt))]
 
+                #make header lable bar
+                Diffheader.config(text=opt[0])
+                Diffheader.grid()
+
+
                 for i in range(0, min(25,size(mat)-1)):
                     possible_options[i+1].set(opt[i+1])
                     Possible_options[i+1].bind('<Button-1>', lambda event, i=i: final_options(mat[i+1]))
+
                 #after buttons have been made final options, adjust number of buttons
                 readjust_diff(min(20, size(mat)))
 
-                #place header
-                Diffheader=Label(mainwin, text=opt[0], font=monofont2, bg=background1)
-                Diffheader.grid(row=3, pady=(20,0))
+
 
             else:
                 final_options(0)
@@ -314,7 +319,7 @@ def diff_search(but_num):
     # add or removed unused options
     def readjust_diff(num):
         for i in range(1, num + 1):
-            Possible_options[i].grid(row=i+3, column=0, pady=(5*(i<2),10-10*(i<num)), padx=(8,8), sticky=W)
+            Possible_options[i].grid(row=i+3, column=0, pady=(5*(i<2),0-0*(i<num)), padx=(8,8))
         for i in range(num + 1, 26):
             Possible_options[i].grid_remove()
         #if num>0:
@@ -381,8 +386,14 @@ def diff_search(but_num):
     sep_line.grid(row=28, column=0)
     Possible_options[26].grid(row=29, column=0, pady=(2,10))
     Selection.grid(row=1, column=0, sticky=W)
-    direc.grid(row=2, column=0)
+    direc.grid(row=2, column=0, pady=(0,20))
 
+    #create header for table entries
+    Diffheader = Label(mainwin, text='', font=monofont2, bg=background1)
+    Diffheader.grid(row=3, pady=(0, 0))
+    Diffheader.grid_remove()
+
+    #start process of finding parameters
     if (len(curr_min)>0):
         set_options(curr_min)
     else:
@@ -980,7 +991,7 @@ CSVbutt=Frame(CSVexp)
 csvbrowse = Button(CSVbutt, text="Browse", command=cbrowse)
 csvbrowse.config(font=runcmnds)
 csvsave = Button(CSVbutt, text="Export", command=csave)
-csvsave.config(font=runcmnds, state="normal")
+csvsave.config(font=runcmnds, state="disabled")
 csvform = Button(CSVbutt, text="Format", command=cformat)
 csvform.config(font=runcmnds)
 
