@@ -307,7 +307,7 @@ def diff_search(but_num):
                     Possible_options[i+1].bind('<Button-1>', lambda event, i=i: final_options(mat[i+1]))
 
                 #after buttons have been made final options, adjust number of buttons
-                readjust_diff(min(20, size(mat)))
+                readjust_diff(min(25, size(mat)))
 
 
 
