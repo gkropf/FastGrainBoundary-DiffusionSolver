@@ -308,6 +308,7 @@ def diff_search(but_num):
 
                 #after buttons have been made final options, adjust number of buttons
                 readjust_diff(min(25, size(mat)))
+                readjust_diff(min(25, size(mat)-1))
 
 
 
@@ -319,7 +320,7 @@ def diff_search(but_num):
     # add or removed unused options
     def readjust_diff(num):
         for i in range(1, num + 1):
-            Possible_options[i].grid(row=i+3, column=0, pady=(5*(i<2),0-0*(i<num)), padx=(8,8))
+            Possible_options[i].grid(row=i+3, column=0, pady=(5*(i<2),0-0*(i<num)), padx=(8,8), sticky=W)
         for i in range(num + 1, 26):
             Possible_options[i].grid_remove()
         #if num>0:
@@ -366,7 +367,7 @@ def diff_search(but_num):
         possible_options[i] = StringVar(mainwin)
         possible_options[i].set('Option'+str(i))
         Possible_options[i] = Label(mainwin, textvariable=possible_options[i], relief="groove")
-        Possible_options[i].config(font=monofont1, bg=background1)
+        Possible_options[i].config(font=monofont2, bg=background1)
 
     for i in range(1,26):
         Possible_options[i].bind('<Button-1>', lambda event, i=i: choose_opt(i))
@@ -400,9 +401,10 @@ def diff_search(but_num):
         direc.config(text='Please give mineral name to search for diffusion parameters.')
 
 
-#load diffusion CSV
+#load diffusion CSV, add b for binary read
 a='ODiffusionR.csv'
-file = open(a, 'r')
+#file = open(a, 'r')
+file = open(a, 'r', encoding='ISO-8859-1')
 raw=file.read()
 rawlines=raw.split('\n')
 diffdata=[x.split(',') for x in rawlines]
