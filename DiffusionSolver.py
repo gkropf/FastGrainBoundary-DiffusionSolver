@@ -7,6 +7,7 @@ import os, sys
 import csv
 from tkinter import ttk
 
+
 # Visual theme controls
 fonts = 12
 titlefonts = ("Helvetica", 11)
@@ -273,7 +274,7 @@ def frac_search(but_num):
 
 	#check that there is a valid path
         if len(path)<1:
-            direc=Label(mainwin, text='There does not exist any remaining path of studies that can link these minerals')
+            direc=Label(mainwin, text='There does not exist any remaining path of studies that can link this mineral to your mintor.')
             direc.config(font=fonts2, bg=background1)
             direc.grid(row=0, column=0, padx=(10,10), pady=(10,10))
             return
@@ -347,16 +348,41 @@ def frac_search(but_num):
         def change_back(jump,jumpchoice):
                 path_opt[jump][jumpchoice].config(bg=background1)
 
+        def notes_look(jump,jumpchoice):
+             notes_but[jump][jumpchoice].config(relief="sunken")
+             notes_win=Toplevel()
+             notes_win.config(bg=background1)
+             curr_notes=fracdata[allpaths[jump][jumpchoice]][11]
+             T=Message(notes_win, text=curr_notes.replace('^',','), width=600)
+             T.config(bg=background1, font=monofont1)
+             #S=Scrollbar(notes_win)
+             #T.insert(END, curr_notes.replace('^',','))
+             T.grid(row=0, column=0, padx=(8,8), pady=(8,8))
+             #S.grid(row=0, column=1)
+             #S.config(command=T.yview)
+             #T.config(yscrollcommand=S.set)
+ 
+        def unclick_note(jump,jumpchoice):
+             notes_but[jump][jumpchoice].config(relief="groove")
+
+        def change_note_to(jump,jumpchoice):
+             notes_but[jump][jumpchoice].config(bg='#ececec')
+
+        def change_note_back(jump,jumpchoice):
+             notes_but[jump][jumpchoice].config(bg=background1)
+
         #make label defined at top
         Fracheader=Label(mainwin, text=opt[0])
         Fracheader.config(font=monofont2, bg=background1)
-        Fracheader.grid(row=2, column=1, sticky=W)
+        Fracheader.grid(row=2, column=1, columnspan=2, sticky=W)
+        Label(mainwin, text='Notes', font=monofont2, bg=background1).grid(row=2, column=2, sticky=W, padx=(8,55))
 
         #create all buttons (as Labels so binds can be manually controlled and updated without .destroy())
         path_opt=dict()
         step_lab=dict()
         rem_checks=dict()
         Rem_checks=dict()
+        notes_but=dict()
 
 
         rowtrack=3
@@ -371,6 +397,7 @@ def frac_search(but_num):
                 path_opt[jump]=dict()
                 rem_checks[jump]=dict()
                 Rem_checks[jump]=dict()
+                notes_but[jump]=dict()
                 for jumpchoice in range(0,pathssize[jump]):
                         # create checkmarks for delete buttons
                         rem_checks[jump][jumpchoice]=IntVar(mainwin)
@@ -378,17 +405,28 @@ def frac_search(but_num):
                         Rem_checks[jump][jumpchoice]=Checkbutton(mainwin, text="", bg=background1, variable=rem_checks[jump][jumpchoice])
                         Rem_checks[jump][jumpchoice].grid(row=rowtrack, column=0)
 
-                        #create button and place
+                        #create main button and place
                         path_opt[jump][jumpchoice]=Label(mainwin, text=opt[int(jumpchoice+sum(pathssize[0:jump])+1)], relief="groove")
                         path_opt[jump][jumpchoice].config(font=monofont1, bg=background1)
-                        path_opt[jump][jumpchoice].grid(row=rowtrack, column=1, stick=W, padx=(0,20))
-                        rowtrack=rowtrack+1
+                        path_opt[jump][jumpchoice].grid(row=rowtrack, column=1, stick=W, padx=(0,10))
 
-                        #make all appropriate binds
+                        #note button and place
+                        notes_but[jump][jumpchoice]=Label(mainwin, text="---", font=monofont1, relief="groove", bg=background1)
+                        notes_but[jump][jumpchoice].grid(row=rowtrack, column=2, padx=(10,0), sticky=N+S+W)
+
+                        #make all appropriate path binds
                         path_opt[jump][jumpchoice].bind('<Enter>', lambda event, i=jump, j=jumpchoice: change_to(i,j))
                         path_opt[jump][jumpchoice].bind('<Leave>', lambda event, i=jump, j=jumpchoice: change_back(i,j))
                         path_opt[jump][jumpchoice].bind('<Button-1>', lambda event, i=jump, j=jumpchoice: lock_choice(i,j))
 
+                        #make all appropriate notes binds
+                        notes_but[jump][jumpchoice].bind('<Button-1>', lambda event, i=jump, j=jumpchoice: notes_look(i,j))
+                        notes_but[jump][jumpchoice].bind('<Enter>', lambda event, i=jump, j=jumpchoice: change_note_to(i,j))
+                        notes_but[jump][jumpchoice].bind('<Leave>', lambda event, i=jump, j=jumpchoice: change_note_back(i,j))
+                        notes_but[jump][jumpchoice].bind('<ButtonRelease-1>', lambda event, i=jump, j=jumpchoice: unclick_note(i,j))
+
+                        #update row tracker
+                        rowtrack=rowtrack+1
 
         #create final run with current path function
         def use_curr():
@@ -461,8 +499,8 @@ def frac_search(but_num):
     mainwin = Toplevel()
     mainwin.wm_title('Find Fractionation Values')
     mainwin.config(bg=background1)
-    create_menus(fractiondata,'biotite','wolframite')
-    #create_menus(fractiondata,rocks[but_num][1].get(),rocks[but_num-1][1].get())
+    #create_menus(fractiondata,'biotite','wolframite')
+    create_menus(fractiondata,rocks[but_num][1].get(),rocks[1][1].get())
 
 
 ### Creation Block for popup Fraction GUI (end)###
@@ -534,7 +572,7 @@ def diff_search(but_num):
         else:
             readjust_diff(0)
             mat = find_in_table(curr_min)
-            if len(mat)>0:
+            if len(mat)>1:
                 direc.config(text="I have the following table entries for this mineral:")
 
                 #create same length option lines
@@ -1190,23 +1228,34 @@ lookupbb =  dict()
 #   lookupb[i].bind("<Button-1>",popup_search[i])
 #   lookupbb[i] = Button(RockChar, text='Diff'+str(i))
 
+search_photo=PhotoImage(file='search3.png')
 
-lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
-lookupb[2] = Button(RockChar, text='Frac2', command= lambda: frac_search(2))
-lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
-lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
-lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
-lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
-lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
-lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
-lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
-lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
-lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
-lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
-lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
-lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
-lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
+for i in range(2,9):
+  lookupb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+  lookupb[i].bind('<Button-1>', lambda event, i=i: frac_search(i))
+  lookupbb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+  lookupbb[i].bind('<Button-1>', lambda event, i=i: diff_search(i))
+lookupbb[1]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+lookupbb[1].bind('<Button-1>', lambda event, i=i: diff_search(1))
 
+
+#Fracheader.image=asss
+#lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
+#lookupb[2] = Button(RockChar, image=search_photo, command= lambda: frac_search(2))
+#lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
+#lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
+#lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
+#lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
+#lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
+#lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
+#lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
+#lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
+#lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
+#lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
+#lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
+#lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
+#lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
+#lookupb[3].image=search_photo#
 
 
 ## Graphing options elements
@@ -1346,10 +1395,10 @@ for i in range(1,9):
         Rocks[i][j].grid(row=i, column=j+1+(j>8)+(j==11), stick=N+S+W+E)
 
 for i in range(2,9):
-    lookupb[i].grid(row=i, column=10)
-    lookupbb[i].grid(row=i, column=13)
+    lookupb[i].grid(row=i, column=10, stick=N+S+E+W)
+    lookupbb[i].grid(row=i, column=13, sticky=N+S+W+E)
 
-lookupbb[1].grid(row=1, column=13)
+lookupbb[1].grid(row=1, column=13, sticky=N+S+E+W)
 
 
 #place everything in graphing options pane
