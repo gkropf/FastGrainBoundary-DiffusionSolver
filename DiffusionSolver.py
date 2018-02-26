@@ -13,8 +13,8 @@ fonts = 12
 titlefonts = ("Helvetica", 11)
 fonts1 = ("helvetica", 11)
 fonts2 = ("ariel", 12, "bold")
-monofont1 = ("monospace",12)
-monofont2 = ("monospace",12,"underline")
+monofont1 = ("consolas 12")
+monofont2 = ("consolas",12,"underline")
 
 brs = ("Hevetica", 10)
 runcmnds = ("Helvetica", 9)
