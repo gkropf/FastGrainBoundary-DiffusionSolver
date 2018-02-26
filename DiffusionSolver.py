@@ -211,8 +211,58 @@ def csave():
 
 
 def cformat():
-    formwind = Toplevel()
-    formwind.wm_title('Format for saved CSV file')
+    format_win = Toplevel()
+    format_win.wm_title('Format used for saved CSV file')
+    format_win.config(bg=background1)
+    formwind=Frame(format_win, bg='black')
+    my_mess="The table below shows the layout for how the simulation data is saved. This is an example for a model run with 4 minerals. X_i is the vector of depths (cm) for mineral i, and yi(t_i) is the corresponding delta-18 values at time t_i." 
+    T=Message(format_win,text=my_mess,font=("helvetica",13), bg=background1, width=800)
+    T.grid(row=0,column=0, sticky=W+E) 
+    formwind.grid(row=1, column=0, padx=(5,5), pady=(5,5))
+
+    cback='white'
+    cfont=("helvetica",16)
+    cxpad=(1,1)
+    cypad=(1,1)
+    Label(formwind,text='0', font=cfont, bg=cback).grid(row=2, column=1, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='0', font=cfont, bg=cback).grid(row=2, column=2, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='0', font=cfont, bg=cback).grid(row=2, column=3, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='0', font=cfont, bg=cback).grid(row=2, column=4, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='x_1', font=cfont, bg=cback).grid(row=3, column=1, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='x_2', font=cfont, bg=cback).grid(row=3, column=2, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='x_3', font=cfont, bg=cback).grid(row=3, column=3, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='x_4', font=cfont, bg=cback).grid(row=3, column=4, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_0', font=cfont, bg=cback).grid(row=2, column=5, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_0', font=cfont, bg=cback).grid(row=2, column=6, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_0', font=cfont, bg=cback).grid(row=2, column=7, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_0', font=cfont, bg=cback).grid(row=2, column=8, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_1', font=cfont, bg=cback).grid(row=2, column=9, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_1', font=cfont, bg=cback).grid(row=2, column=10, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_1', font=cfont, bg=cback).grid(row=2, column=11, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_1', font=cfont, bg=cback).grid(row=2, column=12, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_2', font=cfont, bg=cback).grid(row=2, column=13, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_2', font=cfont, bg=cback).grid(row=2, column=14, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_2', font=cfont, bg=cback).grid(row=2, column=15, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='t_2', font=cfont, bg=cback).grid(row=2, column=16, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y1(t_0)', font=cfont, bg=cback).grid(row=3, column=5, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y2(t_0)', font=cfont, bg=cback).grid(row=3, column=6, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y3(t_0)', font=cfont, bg=cback).grid(row=3, column=7, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y4(t_0)', font=cfont, bg=cback).grid(row=3, column=8, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y1(t_1)', font=cfont, bg=cback).grid(row=3, column=9, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y2(t_1)', font=cfont, bg=cback).grid(row=3, column=10, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y3(t_1)', font=cfont, bg=cback).grid(row=3, column=11, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y4(t_1)', font=cfont, bg=cback).grid(row=3, column=12, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y1(t_2)', font=cfont, bg=cback).grid(row=3, column=13, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y2(t_2)', font=cfont, bg=cback).grid(row=3, column=14, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y3(t_2)', font=cfont, bg=cback).grid(row=3, column=15, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    Label(formwind,text='y4(t_2)', font=cfont, bg=cback).grid(row=3, column=16, padx=cxpad, pady=cypad, stick=N+W+S+E)
+    for i in range(1,3):
+       for j in range(1,17):
+           Label(formwind, text='|', font=cfont, bg=cback).grid(row=i+3, column=j, stick=N+W+S+E, padx=cxpad)
+    for j in range(1,17):
+           Label(formwind, text='\|/', font=cfont, bg=cback).grid(row=i+5, column=j, stick=N+W+S+E, padx=cxpad, pady=(0,1))
+
+
 
 
 #### Function Block for GUI Interface (end) ####
@@ -243,6 +293,7 @@ def frac_search(but_num):
              for k in range(0,len(nextsteps)):
                  if nextsteps[k]==node2:
                       final_path=cchain+[node2]
+                      checked=checked.union([nextsteps[k]])
                  else:
                       checked=checked.union([nextsteps[k]])
                       work_chains.append(cchain+[nextsteps[k]])
@@ -274,7 +325,7 @@ def frac_search(but_num):
 
 	#check that there is a valid path
         if len(path)<1:
-            direc=Label(mainwin, text='There does not exist any remaining path of studies that can link this mineral to your mintor.')
+            direc=Label(mainwin, text='There does not exist any remaining path of studies that can link this mineral to your monitor.')
             direc.config(font=fonts2, bg=background1)
             direc.grid(row=0, column=0, padx=(10,10), pady=(10,10))
             return
