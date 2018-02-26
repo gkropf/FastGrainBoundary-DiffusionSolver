@@ -9,11 +9,11 @@ from tkinter import ttk
 
 # Visual theme controls
 fonts = 12
-titlefonts = ("Helvetica", 10)
+titlefonts = ("Helvetica", 11)
 fonts1 = ("helvetica", 11)
 fonts2 = ("ariel", 12, "bold")
-monofont1 = ("consolas",12)
-monofont2 = ("consolas",12,"underline")
+monofont1 = ("monospace",12)
+monofont2 = ("monospace",12,"underline")
 
 brs = ("Hevetica", 10)
 runcmnds = ("Helvetica", 9)
@@ -126,12 +126,13 @@ def exportf():
 
 def readjustn():
     a=nummin.get()
-    for i in range(1,a+1):
+    for i in range(2,a+1):
         addl(i)
         lookupb[i].grid()
         lookupbb[i].grid()
         GraphCheck[i].grid()
         Graph[i].grid()
+    lookupbb[1].grid()
 
     for i in range(a+1,9):
         removel(i)
@@ -217,15 +218,269 @@ def cformat():
 
 
 
-### Creation Block for popup GUI (beg)###
+### Creation Block for fractionation popup GUI (beg)###
 
 def frac_search(but_num):
+
+    def find_path(list1,list2,node1,node2):	    
+        #find unique connection points
+        n=len(list1)
+        edges=list(set((a,b) if a<b else (b,a) for a,b in zip(list1,list2)))
+
+	#initialize sets
+        checked=set([])
+        work_chains=[[node1]]
+        final_path=[]
+
+    	#perform loops for Breadth-First vector style search algorithm
+        while(len(work_chains)>0):
+             cchain=work_chains[0]
+             cnode=cchain[-1]
+             checked=checked.union([cnode])
+             nextsteps=list(set([x for y,x in edges if y==cnode and x!=y]+[x for x,y in edges if y==cnode and x!=y])-checked)
+             del work_chains[0]
+             for k in range(0,len(nextsteps)):
+                 if nextsteps[k]==node2:
+                      final_path=cchain+[node2]
+                 else:
+                      checked=checked.union([nextsteps[k]])
+                      work_chains.append(cchain+[nextsteps[k]])
+				
+	#start complete search (find all versions of edges)
+        all_steps=[]
+        for k in range(0,len(final_path)-1):
+             min1=final_path[k]
+             min2=final_path[k+1]
+             pairs=[(x,y) for x,y in zip(list1,list2)]
+             poss_steps=[i for i in range(0,n) if (min1,min2)==pairs[i]]
+             poss_steps=poss_steps+[-i for i in range(0,n) if (min2,min1)==pairs[i]]
+             all_steps.append(poss_steps)	
+	
+        return all_steps
+    
+    
+
+
+    def create_menus(fracdata,node1,node2):
+        #use path finder to find current best path
+        list1=[x[1] for x in fracdata]
+        list2=[x[2] for x in fracdata]
+        path=find_path(list1,list2,node1,node2) 
+       
+        #clear all previous elements so new window can be created
+        for child in mainwin.winfo_children():
+             child.destroy()
+
+	#check that there is a valid path
+        if len(path)<1:
+            direc=Label(mainwin, text='There does not exist any remaining path of studies that can link these minerals')
+            direc.config(font=fonts2, bg=background1)
+            direc.grid(row=0, column=0, padx=(10,10), pady=(10,10))
+            return
+        else:
+            direc=Label(mainwin, text='I have the following conversions available for mineral --> monitor')
+            direc.config(font=fonts2, bg=background1)
+            direc.grid(row=0, column=0, pady=(0,0), columnspan=2)
+            sep_top = Label(mainwin, text="---------------------------------------------------------------------------------------------------------------")
+            sep_top.config(font=fonts1, bg=background1)
+            sep_top.grid(row=1, column=0, columnspan=2, pady=(0,10))
+
+        #create step locations and then flatten path list
+        allpaths=path
+        pathssize=[len(x) for x in allpaths]
+        path=[x for y in path for x in y]
+        n=len(path)
+        m=len(allpaths)
+
+        #swap any names and change sign of A,b,c values for negative path numbers
+        for k in path:
+            if k<0:
+                k=abs(k)
+                fracdata[k][1:3]=fracdata[k][2:0:-1]
+                fracdata[k][7:10]=[str(-1*float(x)) for x in fracdata[k][7:10]]
+                fracdata[k][3]=fracdata[k][3].split('-')[1]+'-'+fracdata[k][3].split('-')[0]
+        path=[abs(x) for x in path] #make all pos now that table has been adjusted
+ 
+
+        #create nice-looking equal length strings for display
+        path=[0]+path
+        opt=['' for x in path]
+        optlist=[3,7,8,9,10,4]
+        for k in optlist:
+                #place approp white space inbetween
+                optadd=[fracdata[abs(x)][k] for x in path]
+                lengths=[len(x) for x in opt]
+                maxl=max(lengths)+1+2*(j>1)
+                opt = [opt[x] + ' ' * (maxl - len(opt[x])) + optadd[x] for x in range(0, len(opt))]
+
+                #add space after all placed
+                if k==optlist[-1]:
+                        lengths=[len(x) for x in opt]
+                        maxl=max(lengths)+1
+                        opt=[opt[x]+' '*(maxl-len(opt[x])) for x in range(0,len(opt))]
+
+        #create vector to hold choices for each mineral
+        choices=zeros(len(allpaths))-1
+        rem_list=[]
+
+        #functions to handle choosing and colver of hover
+        def lock_choice(jump,jumpchoice):
+                if choices[jump]>-1:
+                     unlock_choice(jump,int(choices[jump]))
+                path_opt[jump][jumpchoice].unbind('<Leave>')
+                path_opt[jump][jumpchoice].config(bg='#A0A0A0')
+                path_opt[jump][jumpchoice].bind('<Button-1>', lambda event, i=jump, j=jumpchoice: unlock_choice(i,j))
+                choices[jump]=jumpchoice    
+                if (choices>-1).all():
+                     fin_but[1].config(state='normal')
+
+        def unlock_choice(jump,jumpchoice):
+                choices[jump]=-1
+                fin_but[1].config(state='disabled')
+                path_opt[jump][jumpchoice].bind('<Leave>', lambda event, i=jump, j=jumpchoice: change_back(i,j))
+                path_opt[jump][jumpchoice].bind('<Button-1>', lambda event, i=jump, j=jumpchoice: lock_choice(i,j))
+                path_opt[jump][jumpchoice].config(bg=background1)
+
+        def change_to(jump,jumpchoice):
+                path_opt[jump][jumpchoice].config(bg='#A0A0A0')
+
+        def change_back(jump,jumpchoice):
+                path_opt[jump][jumpchoice].config(bg=background1)
+
+        #make label defined at top
+        Fracheader=Label(mainwin, text=opt[0])
+        Fracheader.config(font=monofont2, bg=background1)
+        Fracheader.grid(row=2, column=1, sticky=W)
+
+        #create all buttons (as Labels so binds can be manually controlled and updated without .destroy())
+        path_opt=dict()
+        step_lab=dict()
+        rem_checks=dict()
+        Rem_checks=dict()
+
+
+        rowtrack=3
+        for jump in range(0,m):
+		#create label for current step
+                step_lab[jump]=Label(mainwin,text=fracdata[abs(allpaths[jump][0])][1]+' --> '+fracdata[abs(allpaths[jump][0])][2])
+                step_lab[jump].grid(row=rowtrack, column=1, sticky=W)
+                step_lab[jump].config(font=("helvetica",11,"bold"), bg=background1)
+                rowtrack=rowtrack+1
+		
+                #create buttons for each option for current step
+                path_opt[jump]=dict()
+                rem_checks[jump]=dict()
+                Rem_checks[jump]=dict()
+                for jumpchoice in range(0,pathssize[jump]):
+                        # create checkmarks for delete buttons
+                        rem_checks[jump][jumpchoice]=IntVar(mainwin)
+                        rem_checks[jump][jumpchoice].set(0)
+                        Rem_checks[jump][jumpchoice]=Checkbutton(mainwin, text="", bg=background1, variable=rem_checks[jump][jumpchoice])
+                        Rem_checks[jump][jumpchoice].grid(row=rowtrack, column=0)
+
+                        #create button and place
+                        path_opt[jump][jumpchoice]=Label(mainwin, text=opt[int(jumpchoice+sum(pathssize[0:jump])+1)], relief="groove")
+                        path_opt[jump][jumpchoice].config(font=monofont1, bg=background1)
+                        path_opt[jump][jumpchoice].grid(row=rowtrack, column=1, stick=W, padx=(0,20))
+                        rowtrack=rowtrack+1
+
+                        #make all appropriate binds
+                        path_opt[jump][jumpchoice].bind('<Enter>', lambda event, i=jump, j=jumpchoice: change_to(i,j))
+                        path_opt[jump][jumpchoice].bind('<Leave>', lambda event, i=jump, j=jumpchoice: change_back(i,j))
+                        path_opt[jump][jumpchoice].bind('<Button-1>', lambda event, i=jump, j=jumpchoice: lock_choice(i,j))
+
+
+        #create final run with current path function
+        def use_curr():
+            need_sub=[abs(allpaths[x][int(choices[x])]) for x in range(0,m)][::-1]
+            final_factors=[float(x) for x in fracdata[need_sub[0]][7:10]]
+            for i in range(1,m):
+                final_factors=[float(fracdata[need_sub[i]][x+7])-final_factors[x] for x in range(0,3)]
+            #set fractionation factor values
+            for i in range(0,3):
+                rocks[but_num][6+i].set(final_factors[i])
+            #destory window now that values are set
+            mainwin.destroy()
+
+        #create final removal function
+        def rem_curr():
+            need_remove=[]
+            for jump in range(0,m):
+                for jumpc in range(0,pathssize[jump]):
+                    if(rem_checks[jump][jumpc].get()==1):
+                        table_index=abs(allpaths[jump][jumpc])
+                        need_remove.append(table_index)
+            need_remove=sorted(need_remove)[::-1] #put list in reverse order to handle deletes
+            for i in need_remove:
+                del fracdata[i]
+            #now rerun whole script without these elements
+            create_menus(fracdata,node1,node2)
+            
+
+        #create two final buttons
+        fin_but=dict()
+        fin_but[1]=Button(mainwin, text="Use Current Mineral Studies Chosen", bg=background1, command=use_curr)
+        fin_but[1].config(state='disabled')
+        fin_but[2]=Button(mainwin, text="Remove", bg=background1, command=rem_curr)
+
+
+        #place buttons
+        fin_but[1].grid(row=rowtrack+1, column=1, stick=W, pady=(0,10))
+        fin_but[2].grid(row=rowtrack+1, column=0, padx=(8,8), pady=(0,10))   
+
+        #place division line
+        sep_bot = Label(mainwin, text="---------------------------------------------------------------")
+        sep_bot.config(font=fonts1, bg=background1)
+        sep_bot.grid(row=rowtrack, column=0, columnspan=2, padx=(14,0), pady=(0,0), sticky=W)
+        
+        
+
+   #for getting [x in y in all_steps for x in y]
+
+
+    a='FractionationFactorsR.csv'
+    file = open(a, 'r', encoding='ISO-8859-1')
+    raw=file.read()
+    rawlines=raw.split('\n')
+    rawlines=[x for x in rawlines]
+    n=len(rawlines)-1
+    fractiondata=[x.split(',') for x in rawlines[0:n]]
+
+    #divide factors a and b by 10^6 and 10^3
+    for x in fractiondata[1:n]:
+        x[7]=str(float(x[7])/10**6)
+        x[8]=str(float(x[8])/10**3)
+
+
+
+    #print([x for y in find_path(nameA,nameB,'biotite','wolframite') for x in y])
+
+
+
+    #make main window and run function to create all buttons
     mainwin = Toplevel()
     mainwin.wm_title('Find Fractionation Values')
+    mainwin.config(bg=background1)
+    create_menus(fractiondata,'biotite','wolframite')
+    #create_menus(fractiondata,rocks[but_num][1].get(),rocks[but_num-1][1].get())
 
-    l = Label(mainwin, text='What')
-    l.grid(row=0, column=0)
-    print(but_num)
+
+### Creation Block for popup Fraction GUI (end)###
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Creation Block for popup Diffusion GUI (beg)###
 
 def diff_search(but_num):
 
@@ -309,18 +564,14 @@ def diff_search(but_num):
                 #after buttons have been made final options, adjust number of buttons
                 readjust_diff(min(25, size(mat)))
                 readjust_diff(min(25, size(mat)-1))
-
-
-
             else:
                 final_options(0)
-
 
 
     # add or removed unused options
     def readjust_diff(num):
         for i in range(1, num + 1):
-            Possible_options[i].grid(row=i+3, column=0, pady=(5*(i<2),0-0*(i<num)), padx=(8,8), sticky=W)
+            Possible_options[i].grid(row=i+3, column=0, pady=(5*(i<2),0-0*(i<num)), padx=(8,8))
         for i in range(num + 1, 26):
             Possible_options[i].grid_remove()
         #if num>0:
@@ -343,12 +594,6 @@ def diff_search(but_num):
         return matches
 
 
-
-
-
-
-
-
     mainwin = Toplevel()
     mainwin.wm_title('Find Diffusion Parameters for Mineral')
     mainwin.config(bg=background1)
@@ -367,7 +612,7 @@ def diff_search(but_num):
         possible_options[i] = StringVar(mainwin)
         possible_options[i].set('Option'+str(i))
         Possible_options[i] = Label(mainwin, textvariable=possible_options[i], relief="groove")
-        Possible_options[i].config(font=monofont2, bg=background1)
+        Possible_options[i].config(font=monofont1, bg=background1)
 
     for i in range(1,26):
         Possible_options[i].bind('<Button-1>', lambda event, i=i: choose_opt(i))
@@ -412,7 +657,11 @@ diffdata=[[x.replace(':',',') for x in y] for y in diffdata]
 diffdata=(diffdata[0:1]+[(y[0:2]+[x.replace(' ','') for x in y[2:]]) for y in diffdata[1:]])
 
 
-### Creation Block for popup GUI (end)###
+### Creation Block for popup Diffusion GUI (end)###
+
+
+
+
 
 
 
@@ -919,6 +1168,9 @@ for i in range(1,9):
                 Rocks[i][j] = Label(RockChar, textvariable=rocks[i][j], bg='#dedede', relief="sunken", bd=1, font=fonts1)
                 #Rocks[i][j] = Entry(RockChar, textvariable=rocks[i][j], width=5, font=fonts1, disabledbackground='#dedede')
                 #Rocks[i][j].config(state='disabled')
+rocks[1][6].set('0.00')
+rocks[1][7].set('0.00')
+rocks[1][8].set('0.00')
 #################
 #################BIG NO NO
 #################
@@ -938,7 +1190,7 @@ lookupbb =  dict()
 #   lookupb[i].bind("<Button-1>",popup_search[i])
 #   lookupbb[i] = Button(RockChar, text='Diff'+str(i))
 
-lookupb[1] = Button(RockChar, text='Frac1', command= lambda: frac_search(1))
+
 lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
 lookupb[2] = Button(RockChar, text='Frac2', command= lambda: frac_search(2))
 lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
@@ -1093,9 +1345,11 @@ for i in range(1,9):
     for j in range(1,12):
         Rocks[i][j].grid(row=i, column=j+1+(j>8)+(j==11), stick=N+S+W+E)
 
-for i in range(1,9):
+for i in range(2,9):
     lookupb[i].grid(row=i, column=10)
     lookupbb[i].grid(row=i, column=13)
+
+lookupbb[1].grid(row=1, column=13)
 
 
 #place everything in graphing options pane
