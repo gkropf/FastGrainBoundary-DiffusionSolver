@@ -229,7 +229,7 @@ def cformat():
     formwind.grid(row=1, column=0, padx=(5,5), pady=(5,5))
 
     cback='white'
-    cfont=("helvetica",16)
+    cfont=("helvetica",13)
     cxpad=(1,1)
     cypad=(1,1)
     Label(formwind,text='0', font=cfont, bg=cback).grid(row=2, column=1, padx=cxpad, pady=cypad, stick=N+W+S+E)
@@ -264,11 +264,11 @@ def cformat():
     Label(formwind,text='y2(t_2)', font=cfont, bg=cback).grid(row=3, column=14, padx=cxpad, pady=cypad, stick=N+W+S+E)
     Label(formwind,text='y3(t_2)', font=cfont, bg=cback).grid(row=3, column=15, padx=cxpad, pady=cypad, stick=N+W+S+E)
     Label(formwind,text='y4(t_2)', font=cfont, bg=cback).grid(row=3, column=16, padx=cxpad, pady=cypad, stick=N+W+S+E)
-    for i in range(1,3):
+    for i in range(1,2):
        for j in range(1,17):
            Label(formwind, text='|', font=cfont, bg=cback).grid(row=i+3, column=j, stick=N+W+S+E, padx=cxpad)
     for j in range(1,17):
-           Label(formwind, text='\|/', font=cfont, bg=cback).grid(row=i+5, column=j, stick=N+W+S+E, padx=cxpad, pady=(0,1))
+           Label(formwind, text='|', font=cfont, bg=cback).grid(row=i+5, column=j, stick=N+W+S+E, padx=cxpad, pady=(0,1))
 
 
 
@@ -331,11 +331,24 @@ def frac_search(but_num):
         for child in mainwin.winfo_children():
              child.destroy()
 
+        #used when table entries can't be found and allows manual entry
+        def enter_manual(num):
+            for j in [6,7,8]:
+                Rocks[num][j].grid_remove()
+                Rocks[num][j]=Entry(RockChar, textvariable=rocks[num][j], width=5, font=fonts1)
+                Rocks[num][j].grid(row=num, column=j+1, sticky=N+S+W+E)
+            mainwin.destroy()
+
+        #place manual button
+        Man=Button(mainwin, text="Enter Manually", relief="groove", bg=background1)
+        Man.bind('<Button-1>', lambda event: enter_manual(but_num))
+        Man.grid(row=1, column=2, columnspan=2, pady=(0,10))
+
 	#check that there is a valid path
         if len(path)<1:
             direc=Label(mainwin, text='There does not exist any remaining path of studies that can link this mineral to your monitor.')
             direc.config(font=fonts2, bg=background1)
-            direc.grid(row=0, column=0, padx=(10,10), pady=(10,10))
+            direc.grid(row=0, column=2, padx=(10,10), pady=(10,10))
             return
         else:
             direc=Label(mainwin, text='I have the following conversions available for mineral --> monitor')
@@ -523,16 +536,17 @@ def frac_search(but_num):
 
         #place buttons
         fin_but[1].grid(row=rowtrack+1, column=1, stick=W, pady=(0,10))
-        fin_but[2].grid(row=rowtrack+1, column=0, padx=(8,8), pady=(0,10))   
+        fin_but[2].grid(row=rowtrack+1, column=0, padx=(8,8), pady=(0,10))  
+        Man.grid(row=rowtrack+1, column=0)
 
         #place division line
         sep_bot = Label(mainwin, text="---------------------------------------------------------------")
         sep_bot.config(font=fonts1, bg=background1)
         sep_bot.grid(row=rowtrack, column=0, columnspan=2, padx=(14,0), pady=(0,0), sticky=W)
         
-        
 
-   #for getting [x in y in all_steps for x in y]
+
+
 
 
     a='FractionationFactorsR.csv'
@@ -547,6 +561,7 @@ def frac_search(but_num):
     for x in fractiondata[1:n]:
         x[7]=str(float(x[7])/10**6)
         x[8]=str(float(x[8])/10**3)
+
 
 
 
@@ -1390,8 +1405,8 @@ createToolTip(startlabel, "Beginning temperature in C")
 createToolTip(endlabel, "Ending temperature in C")
 createToolTip(wrdlabel, "Estimate of whole rock")
 
-for i in range(1,12):
-    createToolTip(rockproplab[i], "Explanation of "+rockpropnam[i-1]+" parameter")
+#for i in range(1,12):
+#    createToolTip(rockproplab[i], "Explanation of "+rockpropnam[i-1]+" parameter")
 
 for i in range(1,9):
     createToolTip(rocksl[i], "Properties of mineral sample "+str(i))
