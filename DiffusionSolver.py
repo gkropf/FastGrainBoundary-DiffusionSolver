@@ -125,6 +125,14 @@ def exportf():
     a = filedialog.asksaveasfilename(filetypes=(("Plain Text (.txt)",".txt"),("all files","*.*")),defaultextension=".txt")
     exportb.set(a)
 
+def poss_cool(event):
+    print(1)
+    if cooling.get()=="Custom":
+         print(2)
+         global cool_file 
+         cool_file = filedialog.askopenfilename(filetypes=(("Plain Text (.txt)",".txt"),("all files","*.*")),defaultextension=".txt")
+
+
 def readjustn():
     a=nummin.get()
     for i in range(2,a+1):
@@ -825,10 +833,27 @@ def runmain():
     WRd180 = float(wrd180t.get())
     Tstart = float(modelstart.get())
     Tend = float(modelend.get())
-    cool = 1
     nmin = int(nummin.get())
     de = 100
 
+    if cooling.get() == "Custom":
+        #read data in as matrix without using pandas
+        file=open(cool_file,'r',encoding='ISO-8859-1')
+        raw=file.read()
+        raw_lines=raw.split('\n')
+        raw_data = [x.split(',') for x in raw_lines[0:-1]]
+        segs = array([[float(x) for x in y] for y in raw_data])
+
+        #compute cooling steps
+        [rw, cl] = segs.shape;
+        segtimes = divide(segs[:,0],dt)
+        segtimes = [round(x) for x in segtimes]
+        SegDTdt=[]
+        for p in range(0,rw):
+            thisseg=ones(segtimes[p])*segs[p][1]
+            SegDTdt=concatenate((SegDTdt,thisseg))
+        tend = sum(segtimes);
+        ttot = tend*dt;
 
     # unit definitions and converions
     deltat = dt*3.1536e+13
@@ -982,12 +1007,16 @@ def runmain():
         if(t%10==0):
           loading.step()
           root.update()
-        if cool == 1:
+        if cooling.get() == "Linear":
             DTdt = (Tstart - Tend) / ttot  # linear in t
             T = T0 - (DTdt * (t + 1) * dt)
-        else:
+        elif cooling.get() == "Inverse":
             k = ttot / ((1 / Tend) - (1 / Tstart))
             T = 1 / ((((t + 1) * dt) / k) + (1 / Tstart))
+        else:
+            DTdt = SegDTdt[t];
+            T = T - (DTdt*dt);
+  
         D = D0 * exp(-Q / (R * T))
         fracfax = Afac + Bfac * (1e3 / T) + Cfac * (1e6 / pow(T, 2))
         coeff = D / dx
@@ -1179,7 +1208,7 @@ coollabel = Label(ModelChar,text="Cooling Type", bg=background1)
 coollabel.config(font=fonts2)
 cooling = StringVar(root)
 cooling.set("Linear")
-Cooling = OptionMenu(ModelChar, cooling, "Linear", "Inverse", "Custom")
+Cooling = OptionMenu(ModelChar, cooling, "Linear", "Inverse", "Custom", command=poss_cool)
 Cooling.config(font=fonts1, bg="white", relief="sunken", activebackground=bkgr2, bd=1,
                highlightthickness=0)
 Cooling["menu"].config(bg="white")
