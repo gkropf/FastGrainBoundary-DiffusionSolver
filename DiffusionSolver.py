@@ -1323,34 +1323,34 @@ lookupbb =  dict()
 #   lookupb[i].bind("<Button-1>",popup_search[i])
 #   lookupbb[i] = Button(RockChar, text='Diff'+str(i))
 
-search_photo=PhotoImage(file='search3.png')
+#search_photo=PhotoImage(file='search3.png')
 
-for i in range(2,9):
-  lookupb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-  lookupb[i].bind('<Button-1>', lambda event, i=i: frac_search(i))
-  lookupbb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-  lookupbb[i].bind('<Button-1>', lambda event, i=i: diff_search(i))
-lookupbb[1]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-lookupbb[1].bind('<Button-1>', lambda event, i=i: diff_search(1))
+#for i in range(2,9):
+#  lookupb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+#  lookupb[i].bind('<Button-1>', lambda event, i=i: frac_search(i))
+#  lookupbb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+#  lookupbb[i].bind('<Button-1>', lambda event, i=i: diff_search(i))
+#lookupbb[1]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+#lookupbb[1].bind('<Button-1>', lambda event, i=i: diff_search(1))
 
 
 #Fracheader.image=asss
-#lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
-#lookupb[2] = Button(RockChar, image=search_photo, command= lambda: frac_search(2))
-#lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
-#lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
-#lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
-#lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
-#lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
-#lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
-#lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
-#lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
-#lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
-#lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
-#lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
-#lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
-#lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
-#lookupb[3].image=search_photo#
+lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
+lookupb[2] = Button(RockChar, text='Frac2', command= lambda: frac_search(2))
+lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
+lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
+lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
+lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
+lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
+lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
+lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
+lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
+lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
+lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
+lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
+lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
+lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
+
 
 
 ## Graphing options elements
