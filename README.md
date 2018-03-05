@@ -22,7 +22,8 @@ usr>/Documents: cd OxygenDiffusionSolver
 usr>/Documents/OxygenDiffusionSolver: python3 DiffusionSolver.py
 ```
 This should open the following pop-up:
-![image](https://{https://photos.google.com/photo/AF1QipOJ8RPtTIL3a-4_saRoI4KnqHkNpb1IqYe03WPA})
+![image](https://{photos.google.com/photo/AF1QipOJ8RPtTIL3a-4_saRoI4KnqHkNpb1IqYe03WPA})
+![alt text](http://photos.google.com/photo/AF1QipOJ8RPtTIL3a-4_saRoI4KnqHkNpb1IqYe03WPA)
 
 
 
