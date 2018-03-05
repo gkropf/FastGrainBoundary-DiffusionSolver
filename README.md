@@ -22,7 +22,7 @@ usr>/Documents: cd OxygenDiffusionSolver
 usr>/Documents/OxygenDiffusionSolver: python3 DiffusionSolver.py
 ```
 This should open the following pop-up:
-![alt text](screenshots/screenshot01.png "Description goes here")
+![alt text](Screenshots/Screen01-maingui.png "Description goes here")
 
 
 
