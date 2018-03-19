@@ -125,6 +125,14 @@ def exportf():
     a = filedialog.asksaveasfilename(filetypes=(("Plain Text (.txt)",".txt"),("all files","*.*")),defaultextension=".txt")
     exportb.set(a)
 
+def poss_cool(event):
+    print(1)
+    if cooling.get()=="Custom":
+         print(2)
+         global cool_file 
+         cool_file = filedialog.askopenfilename(filetypes=(("Plain Text (.txt)",".txt"),("all files","*.*")),defaultextension=".txt")
+
+
 def readjustn():
     a=nummin.get()
     for i in range(2,a+1):
@@ -260,7 +268,7 @@ def cformat():
        for j in range(1,17):
            Label(formwind, text='|', font=cfont, bg=cback).grid(row=i+3, column=j, stick=N+W+S+E, padx=cxpad)
     for j in range(1,17):
-           Label(formwind, text='\|/', font=cfont, bg=cback).grid(row=i+5, column=j, stick=N+W+S+E, padx=cxpad, pady=(0,1))
+           Label(formwind, text='|', font=cfont, bg=cback).grid(row=i+5, column=j, stick=N+W+S+E, padx=cxpad, pady=(0,1))
 
 
 
@@ -323,11 +331,24 @@ def frac_search(but_num):
         for child in mainwin.winfo_children():
              child.destroy()
 
+        #used when table entries can't be found and allows manual entry
+        def enter_manual(num):
+            for j in [6,7,8]:
+                Rocks[num][j].grid_remove()
+                Rocks[num][j]=Entry(RockChar, textvariable=rocks[num][j], width=5, font=fonts1)
+                Rocks[num][j].grid(row=num, column=j+1, sticky=N+S+W+E)
+            mainwin.destroy()
+
+        #place manual button
+        Man=Button(mainwin, text="Enter Manually", relief="groove", bg=background1)
+        Man.bind('<Button-1>', lambda event: enter_manual(but_num))
+        Man.grid(row=1, column=2, columnspan=2, pady=(0,10))
+
 	#check that there is a valid path
         if len(path)<1:
             direc=Label(mainwin, text='There does not exist any remaining path of studies that can link this mineral to your monitor.')
             direc.config(font=fonts2, bg=background1)
-            direc.grid(row=0, column=0, padx=(10,10), pady=(10,10))
+            direc.grid(row=0, column=2, padx=(10,10), pady=(10,10))
             return
         else:
             direc=Label(mainwin, text='I have the following conversions available for mineral --> monitor')
@@ -515,16 +536,17 @@ def frac_search(but_num):
 
         #place buttons
         fin_but[1].grid(row=rowtrack+1, column=1, stick=W, pady=(0,10))
-        fin_but[2].grid(row=rowtrack+1, column=0, padx=(8,8), pady=(0,10))   
+        fin_but[2].grid(row=rowtrack+1, column=0, padx=(8,8), pady=(0,10))  
+        Man.grid(row=rowtrack+1, column=0)
 
         #place division line
         sep_bot = Label(mainwin, text="---------------------------------------------------------------")
         sep_bot.config(font=fonts1, bg=background1)
         sep_bot.grid(row=rowtrack, column=0, columnspan=2, padx=(14,0), pady=(0,0), sticky=W)
         
-        
 
-   #for getting [x in y in all_steps for x in y]
+
+
 
 
     a='FractionationFactorsR.csv'
@@ -539,6 +561,7 @@ def frac_search(but_num):
     for x in fractiondata[1:n]:
         x[7]=str(float(x[7])/10**6)
         x[8]=str(float(x[8])/10**3)
+
 
 
 
@@ -825,10 +848,27 @@ def runmain():
     WRd180 = float(wrd180t.get())
     Tstart = float(modelstart.get())
     Tend = float(modelend.get())
-    cool = 1
     nmin = int(nummin.get())
     de = 100
 
+    if cooling.get() == "Custom":
+        #read data in as matrix without using pandas
+        file=open(cool_file,'r',encoding='ISO-8859-1')
+        raw=file.read()
+        raw_lines=raw.split('\n')
+        raw_data = [x.split(',') for x in raw_lines[0:-1]]
+        segs = array([[float(x) for x in y] for y in raw_data])
+
+        #compute cooling steps
+        [rw, cl] = segs.shape;
+        segtimes = divide(segs[:,0],dt)
+        segtimes = [round(x) for x in segtimes]
+        SegDTdt=[]
+        for p in range(0,rw):
+            thisseg=ones(segtimes[p])*segs[p][1]
+            SegDTdt=concatenate((SegDTdt,thisseg))
+        tend = sum(segtimes);
+        ttot = tend*dt;
 
     # unit definitions and converions
     deltat = dt*3.1536e+13
@@ -982,12 +1022,16 @@ def runmain():
         if(t%10==0):
           loading.step()
           root.update()
-        if cool == 1:
+        if cooling.get() == "Linear":
             DTdt = (Tstart - Tend) / ttot  # linear in t
             T = T0 - (DTdt * (t + 1) * dt)
-        else:
+        elif cooling.get() == "Inverse":
             k = ttot / ((1 / Tend) - (1 / Tstart))
             T = 1 / ((((t + 1) * dt) / k) + (1 / Tstart))
+        else:
+            DTdt = SegDTdt[t];
+            T = T - (DTdt*dt);
+  
         D = D0 * exp(-Q / (R * T))
         fracfax = Afac + Bfac * (1e3 / T) + Cfac * (1e6 / pow(T, 2))
         coeff = D / dx
@@ -1179,7 +1223,7 @@ coollabel = Label(ModelChar,text="Cooling Type", bg=background1)
 coollabel.config(font=fonts2)
 cooling = StringVar(root)
 cooling.set("Linear")
-Cooling = OptionMenu(ModelChar, cooling, "Linear", "Inverse", "Custom")
+Cooling = OptionMenu(ModelChar, cooling, "Linear", "Inverse", "Custom", command=poss_cool)
 Cooling.config(font=fonts1, bg="white", relief="sunken", activebackground=bkgr2, bd=1,
                highlightthickness=0)
 Cooling["menu"].config(bg="white")
@@ -1279,34 +1323,34 @@ lookupbb =  dict()
 #   lookupb[i].bind("<Button-1>",popup_search[i])
 #   lookupbb[i] = Button(RockChar, text='Diff'+str(i))
 
-search_photo=PhotoImage(file='search3.png')
+#search_photo=PhotoImage(file='search3.png')
 
-for i in range(2,9):
-  lookupb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-  lookupb[i].bind('<Button-1>', lambda event, i=i: frac_search(i))
-  lookupbb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-  lookupbb[i].bind('<Button-1>', lambda event, i=i: diff_search(i))
-lookupbb[1]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-lookupbb[1].bind('<Button-1>', lambda event, i=i: diff_search(1))
+#for i in range(2,9):
+#  lookupb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+#  lookupb[i].bind('<Button-1>', lambda event, i=i: frac_search(i))
+#  lookupbb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+#  lookupbb[i].bind('<Button-1>', lambda event, i=i: diff_search(i))
+#lookupbb[1]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
+#lookupbb[1].bind('<Button-1>', lambda event, i=i: diff_search(1))
 
 
 #Fracheader.image=asss
-#lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
-#lookupb[2] = Button(RockChar, image=search_photo, command= lambda: frac_search(2))
-#lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
-#lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
-#lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
-#lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
-#lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
-#lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
-#lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
-#lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
-#lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
-#lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
-#lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
-#lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
-#lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
-#lookupb[3].image=search_photo#
+lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
+lookupb[2] = Button(RockChar, text='Frac2', command= lambda: frac_search(2))
+lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
+lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
+lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
+lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
+lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
+lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
+lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
+lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
+lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
+lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
+lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
+lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
+lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
+
 
 
 ## Graphing options elements
@@ -1361,8 +1405,8 @@ createToolTip(startlabel, "Beginning temperature in C")
 createToolTip(endlabel, "Ending temperature in C")
 createToolTip(wrdlabel, "Estimate of whole rock")
 
-for i in range(1,12):
-    createToolTip(rockproplab[i], "Explanation of "+rockpropnam[i-1]+" parameter")
+#for i in range(1,12):
+#    createToolTip(rockproplab[i], "Explanation of "+rockpropnam[i-1]+" parameter")
 
 for i in range(1,9):
     createToolTip(rocksl[i], "Properties of mineral sample "+str(i))
