@@ -3,9 +3,10 @@ from tkinter import filedialog
 from numpy import *
 import numpy.matlib
 import matplotlib.pyplot as plt
-import os, sys
-import csv
+import os, sys, csv, pandas, platform
+import time as systime
 from tkinter import ttk
+
 
 
 # Visual theme controls
@@ -13,8 +14,16 @@ fonts = 12
 titlefonts = ("Helvetica", 11)
 fonts1 = ("helvetica", 11)
 fonts2 = ("ariel", 12, "bold")
-monofont1 = ("monospace",12)
-monofont2 = ("monospace",12,"underline")
+if 'Linux'==platform.system():
+    monofont1 = ("monospace",12)
+    monofont2 = ("monospace",12,"underline")
+elif 'Windows'==platform.system():
+   monofont1 = ("consolas",12)
+   monofont2 = ("consolas", 12)
+else:
+   monofont1 = ("consolas",12)
+   monofont2 = ("consolas", 12)
+
 
 brs = ("Hevetica", 10)
 runcmnds = ("Helvetica", 9)
@@ -322,6 +331,7 @@ def frac_search(but_num):
 
 
     def create_menus(fracdata,node1,node2):
+
         #use path finder to find current best path
         list1=[x[1] for x in fracdata]
         list2=[x[2] for x in fracdata]
@@ -330,6 +340,8 @@ def frac_search(but_num):
         #clear all previous elements so new window can be created
         for child in mainwin.winfo_children():
              child.destroy()
+        #create frame to place choose and manual
+        useorenter=Frame(mainwin, bg=background1)
 
         #used when table entries can't be found and allows manual entry
         def enter_manual(num):
@@ -340,9 +352,10 @@ def frac_search(but_num):
             mainwin.destroy()
 
         #place manual button
-        Man=Button(mainwin, text="Enter Manually", relief="groove", bg=background1)
+        Man=Button(useorenter, text="Enter Manually", relief="groove", bg=background1)
         Man.bind('<Button-1>', lambda event: enter_manual(but_num))
-        Man.grid(row=1, column=2, columnspan=2, pady=(0,10))
+        Man.grid(row=0, column=2, pady=(0,10))
+        useorenter.grid(row=1,column=2)
 
 	#check that there is a valid path
         if len(path)<1:
@@ -353,10 +366,10 @@ def frac_search(but_num):
         else:
             direc=Label(mainwin, text='I have the following conversions available for mineral --> monitor')
             direc.config(font=fonts2, bg=background1)
-            direc.grid(row=0, column=0, pady=(0,0), columnspan=2)
-            sep_top = Label(mainwin, text="---------------------------------------------------------------------------------------------------------------")
+            direc.grid(row=0, column=1, pady=(0,0), columnspan=1)
+            sep_top = Label(mainwin, text="-"*66)
             sep_top.config(font=fonts1, bg=background1)
-            sep_top.grid(row=1, column=0, columnspan=2, pady=(0,10))
+            sep_top.grid(row=1, column=1, columnspan=1, pady=(0,10))
 
         #create step locations and then flatten path list
         allpaths=path
@@ -484,7 +497,7 @@ def frac_search(but_num):
 
                         #note button and place
                         notes_but[jump][jumpchoice]=Label(mainwin, text="---", font=monofont1, relief="groove", bg=background1)
-                        notes_but[jump][jumpchoice].grid(row=rowtrack, column=2, padx=(10,0), sticky=N+S+W)
+                        notes_but[jump][jumpchoice].grid(row=rowtrack, column=2, padx=(8,0), sticky=N+S+W)
 
                         #make all appropriate path binds
                         path_opt[jump][jumpchoice].bind('<Enter>', lambda event, i=jump, j=jumpchoice: change_to(i,j))
@@ -513,31 +526,33 @@ def frac_search(but_num):
             mainwin.destroy()
 
         #create final removal function
-        def rem_curr():
+        def rem_curr(curr_frac_data):
             need_remove=[]
             for jump in range(0,m):
                 for jumpc in range(0,pathssize[jump]):
                     if(rem_checks[jump][jumpc].get()==1):
                         table_index=abs(allpaths[jump][jumpc])
                         need_remove.append(table_index)
-            need_remove=sorted(need_remove)[::-1] #put list in reverse order to handle deletes
+            need_remove=sorted(need_remove)[::-1] #put list in reverse order to handle deletes correctly
+            new_data=curr_frac_data
             for i in need_remove:
-                del fracdata[i]
+                #del fracdata[i]
+                new_data=delete(new_data,i,axis=0)
             #now rerun whole script without these elements
-            create_menus(fracdata,node1,node2)
+            create_menus(new_data,node1,node2)
             
 
         #create two final buttons
         fin_but=dict()
-        fin_but[1]=Button(mainwin, text="Use Current Mineral Studies Chosen", bg=background1, command=use_curr)
+        fin_but[1]=Button(useorenter, text="Use Current Mineral Studies Chosen", bg=background1, command=use_curr)
         fin_but[1].config(state='disabled')
-        fin_but[2]=Button(mainwin, text="Remove", bg=background1, command=rem_curr)
+        fin_but[2]=Button(mainwin, text="Remove", bg=background1,command=lambda: rem_curr(fracdata))
 
 
         #place buttons
-        fin_but[1].grid(row=rowtrack+1, column=1, stick=W, pady=(0,10))
+        fin_but[1].grid(row=0, column=1, stick=W, pady=(0,10))
         fin_but[2].grid(row=rowtrack+1, column=0, padx=(8,8), pady=(0,10))  
-        Man.grid(row=rowtrack+1, column=0)
+        useorenter.grid(row=rowtrack+1, column=1, sticky=W)
 
         #place division line
         sep_bot = Label(mainwin, text="---------------------------------------------------------------")
@@ -550,16 +565,18 @@ def frac_search(but_num):
 
 
     a='FractionationFactorsR.csv'
-    file = open(a, 'r', encoding='ISO-8859-1')
-    raw=file.read()
-    rawlines=raw.split('\n')
-    rawlines=[x for x in rawlines]
-    n=len(rawlines)-1
-    fractiondata=[x.split(',') for x in rawlines[0:n]]
+    fractiondata=pandas.read_csv(a, header=None).values.astype('str')
+    n=len(fractiondata)
+    #file = open(a, 'r', encoding='ISO-8859-1')
+    #raw=file.read()
+    #rawlines=raw.split('\n')
+    #rawlines=[x for x in rawlines]
+    #n=len(rawlines)-1
+    #fractiondata=[x.split(',') for x in rawlines[0:n]]
 
     #divide factors a and b by 10^6 and 10^3
     for x in fractiondata[1:n]:
-        x[7]=str(float(x[7])/10**6)
+        x[9]=str(float(x[9])/10**6)
         x[8]=str(float(x[8])/10**3)
 
 
@@ -573,6 +590,7 @@ def frac_search(but_num):
     mainwin = Toplevel()
     mainwin.wm_title('Find Fractionation Values')
     mainwin.config(bg=background1)
+    useorenter=Frame(mainwin)
     #create_menus(fractiondata,'biotite','wolframite')
     create_menus(fractiondata,rocks[but_num][1].get(),rocks[1][1].get())
 
@@ -615,10 +633,10 @@ def diff_search(but_num):
     def set_diff_params(num):
         Ea=diffdata[num][5]
         if len(Ea)>0:
-            rocks[but_num][10].set(float(Ea))
+            rocks[but_num][10].set(1000*float(Ea))
         else:
             rocks[but_num][10].set(0)
-        rocks[but_num][9].set(1000*float(diffdata[num][6]))
+        rocks[but_num][9].set(float(diffdata[num][6]))
         mainwin.destroy()
 
 
@@ -652,7 +670,7 @@ def diff_search(but_num):
                 #create same length option lines
                 opt = ['' for x in mat]
 
-                optlist=[1,2,3,4,5,6,8,10]
+                optlist=[1,2,3,4,6,5,8,10]
                 for j in optlist:
                     optadd = [diffdata[x][j] for x in mat]
                     lengths = [len(x) for x in opt]
@@ -838,7 +856,7 @@ conversions['clay'] = ['kaolinite','smectite','inite']
 
 # This is the main diffusion solver function
 def runmain():
-
+    start_time=systime.time()
     loading.grid(row=3, column=1, columnspan=1, sticky=W)
     root.update()
 
@@ -880,7 +898,7 @@ def runmain():
 
     # initialize storage matrices
     mode = zeros([nmin])
-    shape = zeros([nmin])
+    shape = zeros([nmin]).astype(int)
     L = zeros([nmin])
     w = zeros([nmin])
     r = zeros([nmin])
@@ -900,69 +918,26 @@ def runmain():
 
     ## get all rock properties
 
-    # mineral 1 - monitor, quartz
-    mode[0] = 0.20
-    shape[0] = 2
-    r[0] = 20
-    L[0] = 2 * r[0]
-    w[0] = 20
-    dx[0] = r[0] / de
-    gb[0] = math.ceil(L[0] / dx[0])
-    Afac[0] = 0
-    Bfac[0] = 0
-    Cfac[0] = 0
-    d180[0] = 99
-    D0[0] = 3.4e-9
-    Q[0] = 98000
-    oxcon[0] = 0.0882
+    for j in range(0,nmin):
+       mode[j]=rocks[j+1][2].get()
+       if rocks[j+1][3].get()=="Spherical":
+           shape[j]=1
+       if rocks[j+1][3].get()=="Slab":
+           shape[j]=2
+       r[j] = rocks[j+1][4].get()
+       L[j] = 2*r[j]
+       w[j] = rocks[j+1][5].get()
+       dx[j] = r[j]/de
+       gb[j] = math.ceil(L[j]/dx[j])
+       Afac[j] = rocks[j+1][6].get()
+       Bfac[j] = rocks[j+1][7].get()
+       Cfac[j] = rocks[j+1][8].get()
+       D0[j] = rocks[j+1][9].get()
+       Q[j] = rocks[j+1][10].get()
+       oxcon[j] = rocks[j+1][11].get()
+       d180[j] = 99
 
-    # mineral 2 - alkali feldspar
-    mode[1] = 0.76
-    shape[1] = 1
-    r[1] = 30
-    L[1] = 2 * r[1]
-    w[1] = 30
-    dx[1] = r[1] / de
-    gb[1] = math.ceil(L[1] / dx[1])
-    Afac[1] = 0
-    Bfac[1] = 0
-    Cfac[1] = 1.0
-    d180[1] = 99
-    D0[1] = 7.6e-6
-    Q[1] = 129500
-    oxcon[1] = 0.0734
 
-    # mineral 3 - titanite
-    mode[2] = 0.01
-    shape[2] = 1
-    r[2] = 450
-    L[2] = 2 * r[2]
-    w[2] = 700
-    dx[2] = r[2] / de
-    gb[2] = math.ceil(L[2] / dx[2])
-    Afac[2] = 0
-    Bfac[2] = 0
-    Cfac[2] = 3.66
-    d180[2] = 99
-    D0[2] = 2.05e-8
-    Q[2] = 180000
-    oxcon[2] = 0.0874
-
-    # mineral 4 - augite
-    mode[3] = 0.03
-    shape[3] = 1
-    r[3] = 30
-    L[3] = 2 * r[3]
-    w[3] = 30
-    dx[3] = r[3] / de
-    gb[3] = math.ceil(L[3] / dx[3])
-    Afac[3] = 0
-    Bfac[3] = 0
-    Cfac[3] = 2.75
-    d180[3] = 99
-    D0[3] = 1.5e-6
-    Q[3] = 226000
-    oxcon[3] = 0.0892
 
     # convert input to micron
     L = L * 1e-4
@@ -1082,7 +1057,7 @@ def runmain():
             yresult[i,:,0:2*int(xsteps/2)]=concatenate((onesidey[:,::-1],onesidey),axis=1)
         else:
             xresult[:,i]=1e4*linspace(dx[i],L[i]-dx[i],xsteps)
-
+    print(systime.time()-start_time)
 
 
 
@@ -1292,7 +1267,7 @@ for i in range(1,9):
         else:
             if j==3:
                 rocks[i][j].set('Slab')
-                Rocks[i][j] = OptionMenu(RockChar, rocks[i][j], "Slab", "Cylindrical", "Spherical")
+                Rocks[i][j] = OptionMenu(RockChar, rocks[i][j], "Slab", "Spherical")
                 Rocks[i][j].config(font=fonts1, bg="white", relief="sunken", activebackground=bkgr2, bd=1,
                                    highlightthicknes=0)
                 Rocks[i][j]["menu"].config(bg="white")
@@ -1325,31 +1300,36 @@ lookupbb =  dict()
 
 #search_photo=PhotoImage(file='search3.png')
 
-#for i in range(2,9):
-#  lookupb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-#  lookupb[i].bind('<Button-1>', lambda event, i=i: frac_search(i))
-#  lookupbb[i]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-#  lookupbb[i].bind('<Button-1>', lambda event, i=i: diff_search(i))
-#lookupbb[1]=Button(RockChar, image=search_photo, bg=background1, relief='flat')
-#lookupbb[1].bind('<Button-1>', lambda event, i=i: diff_search(1))
+for i in range(2,9):
+  #create frac factor look up buttons and tool tips
+  lookupb[i]=Button(RockChar, text='Frac'+str(i))
+  lookupb[i].bind('<Button-1>', lambda event, i=i: frac_search(i))
+  createToolTip(lookupb[i],"Look up fractionation factors relating this mineral to monitor mineral")
+
+for i in range(1,9):
+  #create diff look up buttons and tool tips
+  lookupbb[i]=Button(RockChar, text='Diff'+str(i))
+  lookupbb[i].bind('<Button-1>', lambda event, i=i: diff_search(i))
+  createToolTip(lookupbb[i],"Look up diffusion parameters for this mineral")
+
 
 
 #Fracheader.image=asss
-lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
-lookupb[2] = Button(RockChar, text='Frac2', command= lambda: frac_search(2))
-lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
-lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
-lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
-lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
-lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
-lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
-lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
-lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
-lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
-lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
-lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
-lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
-lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
+#lookupbb[1] = Button(RockChar, text='Diff1', command= lambda: diff_search(1))
+#lookupb[2] = Button(RockChar, text='Frac2', command= lambda: frac_search(2))
+#lookupbb[2] = Button(RockChar, text='Diff2', command= lambda: diff_search(2))
+#lookupb[3] = Button(RockChar, text='Frac3', command= lambda: frac_search(3))
+#lookupbb[3] = Button(RockChar, text='Diff3', command= lambda: diff_search(3))
+#lookupb[4] = Button(RockChar, text='Frac4', command= lambda: frac_search(4))
+#lookupbb[4] = Button(RockChar, text='Diff4', command= lambda: diff_search(4))
+#lookupb[5] = Button(RockChar, text='Frac5', command= lambda: frac_search(5))
+#lookupbb[5] = Button(RockChar, text='Diff5', command= lambda: diff_search(5))
+#lookupb[6] = Button(RockChar, text='Frac6', command= lambda: frac_search(6))
+#lookupbb[6] = Button(RockChar, text='Diff6', command= lambda: diff_search(6))
+#lookupb[7] = Button(RockChar, text='Frac7', command= lambda: frac_search(7))
+#lookupbb[7] = Button(RockChar, text='Diff7', command= lambda: diff_search(7))
+#lookupb[8] = Button(RockChar, text='Frac8', command= lambda: frac_search(8))
+#lookupbb[8] = Button(RockChar, text='Diff8', command= lambda: diff_search(8))
 
 
 
@@ -1403,7 +1383,11 @@ createToolTip(timlabel, "incremental time step in diffusion solver in milions of
 createToolTip(coollabel, "This creates temperature profile")
 createToolTip(startlabel, "Beginning temperature in C")
 createToolTip(endlabel, "Ending temperature in C")
-createToolTip(wrdlabel, "Estimate of whole rock")
+createToolTip(wrdlabel, "Estimate of whole rock delta-18O")
+createToolTip(csvbrowse, 'Look up file to save data from model run to')
+createToolTip(csvsave, 'Save model run data to selected file')
+createToolTip(csvform, 'Open pop-up showing format of saved files')
+
 
 #for i in range(1,12):
 #    createToolTip(rockproplab[i], "Explanation of "+rockpropnam[i-1]+" parameter")
