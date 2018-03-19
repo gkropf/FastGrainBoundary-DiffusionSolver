@@ -880,7 +880,7 @@ def runmain():
         #compute cooling steps
         [rw, cl] = segs.shape;
         segtimes = divide(segs[:,0],dt)
-        segtimes = [round(x) for x in segtimes]
+        segtimes = [int(round(x)) for x in segtimes]
         SegDTdt=[]
         for p in range(0,rw):
             thisseg=ones(segtimes[p])*segs[p][1]
