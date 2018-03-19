@@ -233,12 +233,12 @@ def cformat():
     format_win.config(bg=background1)
     formwind=Frame(format_win, bg='black')
     my_mess="The table below shows the layout for how the simulation data is saved. This is an example for a model run with 4 minerals. X_i is the vector of depths (cm) for mineral i, and yi(t_i) is the corresponding delta-18 values at time t_i." 
-    T=Message(format_win,text=my_mess,font=("helvetica",13), bg=background1, width=800)
+    T=Message(format_win,text=my_mess,font=("helvetica",12), bg=background1, width=800)
     T.grid(row=0,column=0, sticky=W+E) 
     formwind.grid(row=1, column=0, padx=(5,5), pady=(5,5))
 
     cback='white'
-    cfont=("helvetica",13)
+    cfont=("helvetica",12)
     cxpad=(1,1)
     cypad=(1,1)
     Label(formwind,text='0', font=cfont, bg=cback).grid(row=2, column=1, padx=cxpad, pady=cypad, stick=N+W+S+E)
