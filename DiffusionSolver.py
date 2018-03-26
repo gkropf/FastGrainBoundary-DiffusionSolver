@@ -21,8 +21,8 @@ elif 'Windows'==platform.system():
    monofont1 = ("consolas",12)
    monofont2 = ("consolas", 12)
 else:
-   monofont1 = ("consolas",12)
-   monofont2 = ("consolas", 12)
+   monofont1 = ("Courier",12)
+   monofont2 = ("Courier", 12,"underline")
 
 
 brs = ("Hevetica", 10)
