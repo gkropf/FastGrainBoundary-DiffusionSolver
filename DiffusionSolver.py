@@ -1387,7 +1387,17 @@ createToolTip(wrdlabel, "Estimate of whole rock delta-18O")
 createToolTip(csvbrowse, 'Look up file to save data from model run to')
 createToolTip(csvsave, 'Save model run data to selected file')
 createToolTip(csvform, 'Open pop-up showing format of saved files')
-
+createToolTip(rockproplab[1],'Used for search menus. Does not affect actual model run.')
+createToolTip(rockproplab[2],'Portion of sample that is composed of this mineral')
+createToolTip(rockproplab[3],'Diffusivity geometry')
+createToolTip(rockproplab[4],'Mineral radius in um')
+createToolTip(rockproplab[5],'Mineral width in um')
+createToolTip(rockproplab[6],'Ceofficients of fractionation factors: A+B*(10^3/T)+C*(10^6/T^2)')
+createToolTip(rockproplab[7],'Ceofficients of fractionation factors: A+B*(10^3/T)+C*(10^6/T^2)')
+createToolTip(rockproplab[8],'Ceofficients of fractionation factors: A+B*(10^3/T)+C*(10^6/T^2)')
+createToolTip(rockproplab[9],'Diffusivity in cm2/s')
+createToolTip(rockproplab[10],'Activiation energy in J')
+createToolTip(rockproplab[11],'Oxygen density in moles oxygen/cm3')
 
 #for i in range(1,12):
 #    createToolTip(rockproplab[i], "Explanation of "+rockpropnam[i-1]+" parameter")
