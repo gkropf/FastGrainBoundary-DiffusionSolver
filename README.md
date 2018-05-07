@@ -46,3 +46,6 @@ To save the model parameters click on the 'Browse' inline with 'Export'. After s
 
 ![alt text](Screenshots/Screen06-modeloutput.png "")
 
+
+ This material is based upon work supported by the National Science Foundation under Grant Number 1650355.
+
