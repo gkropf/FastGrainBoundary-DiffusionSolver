@@ -23,6 +23,7 @@ class ForwardModelInputs(tk.Frame):
 
 
 
+
     def __init__(self,parent,mainapp):
         tk.Frame.__init__(self,parent)
         self.config(bg=mainapp.Background1)
@@ -33,8 +34,8 @@ class ForwardModelInputs(tk.Frame):
 
 
         tk.Label(self, text='Forward Models', font=mainapp.font_labels,
-                 bg=mainapp.Background1).grid(row=0, column=0, padx=(4,0), pady=(4,0))
-        tk.Frame(self, width=2, bg='black').grid(row=1, column=1, sticky='ns',
+                 bg=mainapp.Background1).grid(row=0, column=1, padx=(4,0), pady=(4,0))
+        tk.Frame(self, width=2, bg='black').grid(row=1, column=2, sticky='ns',
                                                  rowspan=5, padx=(3, 3))
 
 
@@ -49,7 +50,7 @@ class ForwardModelInputs(tk.Frame):
                                                anchor='w', font=mainapp.font_inputs)
             self.forwardmodels_lab[i].configure(bg='white', relief='sunken', height=1,
                                                 width=25)
-            self.forwardmodels_lab[i].grid(row=i+1, column=0, sticky='nsew', padx=(4,0))
+            self.forwardmodels_lab[i].grid(row=i+1, column=1, sticky='nsew', padx=(4,0))
 
             self.forwardmodels_lab[i].bind("<Enter>", lambda event, i=i, h=self.forwardmodels_lab[i]:
                                        h.configure(bg='#dbdbdb'))
@@ -57,6 +58,16 @@ class ForwardModelInputs(tk.Frame):
                                        h.configure(bg='white'))
             self.forwardmodels_lab[i].bind("<Button-1>", lambda event, i=i: self.loadmodel(parent,i))
 
+
+        # Create line earase buttons
+        for i in range(0,5):
+            self.delline=tk.Label(self, text='X', bg=mainapp.Background1, relief='raised')
+            self.delline.grid(row=i+1, column=0, padx=(4,0))
+            self.delline.bind("<Enter>", lambda event, h=self.delline:
+                                                h.configure(bg='red'))
+            self.delline.bind("<Leave>", lambda event, h=self.delline:
+            h.configure(bg=mainapp.Background1))
+            self.delline.bind("<Button-1>", lambda event, i=i: parent.deleteline(i))
 
 
     print('\n')
@@ -90,39 +101,20 @@ class ErrorFileInputs(tk.Frame):
                 self.errfile_lab[(i,j)]=tk.Label(self, textvariable=self.errfile_var[(i,j)],
                                                  anchor='w', font=mainapp.font_inputs)
                 self.errfile_lab[(i,j)].configure(bg='#c9c7c7', relief='sunken', width=15)
-                self.errfile_lab[(i,j)].grid(row=i+1, column=j, sticky='nsew', padx=(0,4*(j==7)))
+                self.errfile_lab[(i,j)].grid(row=i+1, column=j, sticky='nsew', padx=(0,5*(j==7)))
 
-
-
-
-
-
-
-
-
-
-        self.bob = tk.StringVar(self)
-        self.bob.set('a')
 
 
     def loaderror(self, inversepage,i,j):
-        print(self.bob.get())
-        print((i,j))
+
+        curr_loc=self.errfile_var[(i,j)].get()
+        file_loc = filedialog.askopenfilename(filetypes=(("Model File", ".txt"), ("all files", "*.*")),
+                                              defaultextension=".txt", initialdir=curr_loc)
+        if file_loc:
+            self.errfile_var[(i,j)].set(file_loc)
+
 
         print('')
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class InverseModelPage(tk.Frame):
@@ -139,8 +131,29 @@ class InverseModelPage(tk.Frame):
             self.errorfileframe.errfile_lab[(i, j)].bind("<Button-1>", lambda event, i=i, j=j:
             self.errorfileframe.loaderror(self, i, j))
 
+        for j in range(nmin,8):
+            self.errorfileframe.errfile_lab[(i, j)].configure(bg='#c9c7c7')
+            self.errorfileframe.errfile_lab[(i, j)].bind("<Enter>",
+                                                         lambda event, i=i, h=self.errorfileframe.errfile_lab[(i, j)]:
+                                                         h.configure(bg='#c9c7c7'))
+            self.errorfileframe.errfile_lab[(i, j)].bind("<Leave>",
+                                                         lambda event, i=i, h=self.errorfileframe.errfile_lab[(i, j)]:
+                                                         h.configure(bg='#c9c7c7'))
+            self.errorfileframe.errfile_lab[(i, j)].bind("<Button-1>", lambda event: 1+1)
+
 
         print('\n')
+
+
+    def deleteline(self,n):
+
+        self.forwardmodelframe.forwardmodels_var[n].set('')
+        self.set_nummin(n,0)
+        for j in range(0,8):
+            self.errorfileframe.errfile_var[(n,j)].set('')
+
+
+
 
 
     def __init__(self, parent):
