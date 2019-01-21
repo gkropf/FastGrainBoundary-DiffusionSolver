@@ -26,11 +26,8 @@ class FastGrainDiffusionApp(tk.Frame):
         self.font_mono1 = tkFont.Font(family='monospace', size=11)
         self.font_mono2 = tkFont.Font(family='monospace', size=11)
         self.font_mono2.configure(underline=True)
-
-
         self.font_inputs2 = tkFont.Font(family="Helvetica", size=13)
-
-
+        self.font_large = tkFont.Font(family="ariel", size=16, weight='bold')
 
 
 

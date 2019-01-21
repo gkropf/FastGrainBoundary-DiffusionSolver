@@ -3,6 +3,8 @@ from numpy import *
 from tkinter import ttk
 import pandas
 from scipy import interpolate
+from scipy import optimize
+import matplotlib.pyplot as plt
 import os
 
 # This is the main diffusion solver function that uses python, this results in a 3d array that has the
@@ -314,18 +316,54 @@ def calc_residuals(mainapp,cool_array,reg_alpha):
         L[i,i:i+3]=[1, -2, 1]
 
     #stack to make K vector
-    return vstack((residuals,matmul(reg_alpha*L,cool_array[:,1]).reshape(-1,1)))
+    res=vstack((residuals,matmul(reg_alpha*L,cool_array[:,1]).reshape(-1,1)))
+    return res.reshape(N+m-2)
 
 
-def calc_jacob(mainapp,cool_array,curr_res,reg_alpha):
+def calc_jacob(mainapp,cool_array,curr_res,reg_alpha,past_SSE,past_aLm):
+
+    # Calculate current sse and smoothness
+    m=len(cool_array)
+    curr_res=calc_residuals(mainapp,cool_array,reg_alpha)
+    curr_SSE=sum(curr_res[0:-(m-2)]**2)
+    curr_aLm=sum(curr_res[-(m-2):]**2)
+    past_SSE.append(curr_SSE)
+    past_aLm.append(curr_aLm)
+
+    # Update progress figures
+    mainapp.page2.progwind.line11.set_data(cool_array[:,0],cool_array[:,1])
+    mainapp.page2.progwind.line12.set_data(cool_array[:,0],cool_array[:,1])
+    limx1, limx2 = min(cool_array[:,0]), max(cool_array[:,0])
+    limy1, limy2 = min(cool_array[:,1]), max(cool_array[:,1])
+
+    mainapp.page2.progwind.ax1.set_ylim([limy1-.03*limy2, 1.03*limy2])
+    mainapp.page2.progwind.ax1.set_xlim([limx1-.03*limx2, 1.03*limx2])
+
+    # Update 30 most recent objective values into bar plot. The bar graph does not have a built in function
+    # to update the number of entries.
+    num_iter=len(past_SSE)
+    if num_iter<31:
+        for i in range(len(past_SSE)):
+            mainapp.page2.progwind.bar2[i].set_height(past_SSE[i]+past_aLm[i])
+            mainapp.page2.progwind.bar2[i].set_height(past_SSE[i])
+    else:
+        for i in range(num_iter-30,num_iter):
+            k = i+(num_iter-30)
+            mainapp.page2.progwind.bar2[i].set_height(past_SSE[k]+past_aLm[k])
+            mainapp.page2.progwind.bar2[i].set_height(past_SSE[k])
+
+
+    mainapp.page2.progwind.canvas1.draw()
+    mainapp.page2.progwind.canvas2.draw()
+    mainapp.update()
 
     N=len(curr_res)
-    m=len(cool_array)
     deltac=1;
 
     J=zeros([N,m-2])
     for i in range(1,m-1):
-        print('--calc column '+str(i))
+        mainapp.page2.progwind.calc_var.set("calculating Jacobian column "+str(i)+" of "+str(m-2))
+        mainapp.update()
         new_cool=cool_array.copy()
         new_cool[i,1]=new_cool[i,1]+deltac
         deriv=(calc_residuals(mainapp,new_cool,reg_alpha)-curr_res)/deltac
@@ -337,47 +375,59 @@ def calc_jacob(mainapp,cool_array,curr_res,reg_alpha):
 # This function runs the inverse solver for the minerals, initial profiles given
 def find_inverses(mainapp):
 
-    alpha=0.03032227
-    curr_sol=pandas.read_csv('Inverse_InitialSol/Initial01.txt', sep=',', header=None).values
-    curr_res=calc_residuals(mainapp,curr_sol,alpha)
-    curr_obj = sqrt(sum(curr_res ** 2))
+    alpha=0.04032227
 
-    startt=systime.time()
-    #now perform actual LM algorithm
-    step = 0
-    lam = .00125
-    lamstop = 1000
+    for i in range(0,mainapp.page2.num_initials):
+        if (mainapp.page2.initsolutions.initial_vars[i].get()==1):
+            file_loc=mainapp.page2.initsolutions.folder_var.get()+mainapp.page2.initsolutions.initial_labs[i].get()
+            initial_sol=pandas.read_csv(file_loc, sep=',', header=None).values
+            m=len(initial_sol)
 
 
-    while (lam < lamstop):
-        step = step + 1
-        J = calc_jacob(mainapp, curr_sol, curr_res, alpha)
-        m = len(curr_sol)
-        checkinglam = True
+            # Calculate initial residuals and smoothness, and create progress plots that will be updated
+            # each time the Jac function is called.
+            initial_res=calc_residuals(mainapp,initial_sol,alpha)
+            initial_SSE=sum(initial_res[0:-(m-2)]**2)
+            initial_aLm=sum(initial_res[-(m-2):]**2)
 
-        while ((lam < lamstop) & checkinglam):
-            left = matmul(transpose(J), J) + lam * eye(m - 2)
-            right = -1 * matmul(transpose(J), curr_res)
-            cool_step = linalg.solve(left, right).reshape(m - 2)
-            print('Thse JJ matrix has condition number: ' + str(round(linalg.cond(matmul(transpose(J), J)), 6)))
-            print('-using lam=' + str(lam))
-            new_sol = curr_sol
-            new_sol[1:m - 1, 1] = new_sol[1:m - 1, 1] + cool_step
-            new_res = calc_residuals(mainapp,new_sol,alpha)
-            new_obj = sqrt(sum(new_res ** 2))
+            past_sse=[initial_SSE]
+            past_aLm=[initial_aLm]
+            mainapp.page2.create_progwind(mainapp,initial_sol,initial_SSE,initial_aLm)
+            mainapp.page2.progwind.init_var.set("Running LM algorithm with starting solution: /"+
+                                                mainapp.page2.initsolutions.initial_labs[i].get())
 
-            if (new_obj < curr_obj):
-                curr_obj = new_obj
-                curr_sol = new_sol
-                curr_res = new_res
-                lam = .5 * lam
-                checkinglam = False
-            else:
-                lam = 7 * lam
 
-        print('I have completed model step ' + str(step) + ' with a current weighted RMS: ' + str(round(curr_obj, 6)))
 
-    print('This ran in: '+str(systime.time()-startt))
+
+            # Create residual and jacobian function that accepts single array as input (for built in optimize function)
+            def usey_residuals(cool_y):
+                full_soln=initial_sol.copy()
+                full_soln[1:-1,1]=cool_y
+                return calc_residuals(mainapp, full_soln, alpha)
+
+            def usey_jacob(soln_y):
+                full_soln=initial_sol.copy()
+                full_soln[1:-1,1]=soln_y
+                curr_res=calc_residuals(mainapp, full_soln, alpha)
+                return calc_jacob(mainapp, full_soln, curr_res, alpha, past_sse, past_aLm)
+
+            # Now find solution and convert it back into 2D array
+            initial_solny=initial_sol[1:-1,1].copy()
+            sol=optimize.least_squares(usey_residuals, initial_solny , jac=usey_jacob, method='lm', gtol=1e-9)
+            final_sol=initial_sol.copy()
+            final_sol[1:-1,1]=sol.x
+
+            # Calculate objective values and SSE
+            final_res=calc_residuals(mainapp,final_sol,alpha)
+            final_SSE=sum(final_res[0:-(m-2)]**2)
+            final_aLm=sum(final_res[-(m-2):]**2)
+
+            # Get magnitude of final gradient function
+            K=calc_jacob(mainapp,final_sol,calc_residuals(mainapp,final_sol,alpha),alpha,past_sse,past_aLm)
+            Kmag=linalg.norm(matmul(transpose(K),final_res))
+
+
+
 
 
 

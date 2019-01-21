@@ -1,9 +1,71 @@
 import tkinter as tk
 from tkinter import filedialog
 from numpy import *
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import pandas
 import glob
 
 
+class InverseProgressWindow(tk.Toplevel):
+    def __init__(self,mainapp,init_soln,init_sse,init_aLm):
+        tk.Toplevel.__init__(self, mainapp)
+        self.config(bg=mainapp.Background1)
+        self.title('Inverse solver progress window')
+
+        # Make current solutions plot
+        frame1 = tk.Frame(self, relief='solid', borderwidth=3)
+        self.fig1 = Figure()
+        self.fig1.suptitle('Inverse Solution', weight='bold')
+
+        self.ax1 = self.fig1.add_subplot(111)
+        self.ax1.set_xlabel('Time (m.y.)')
+        self.ax1.set_ylabel('Temperature (C')
+
+        self.line11 = self.ax1.plot(init_soln[:,0],init_soln[:,1],'b-', label='Current')[0]
+        self.line12 = self.ax1.plot(init_soln[:,0],init_soln[:,1],'bs')[0]
+        self.line13 = self.ax1.plot(init_soln[:,0],init_soln[:,1],'k--', label='Initial')
+        self.ax1.legend()
+
+        self.canvas1 = FigureCanvasTkAgg(self.fig1,frame1)
+        self.canvas1.show()
+        self.canvas1.get_tk_widget().pack(side='top', fill='both', expand=1)
+        self.canvas1._tkcanvas.pack(side='top', fill='both', expand=1)
+        frame1.grid(row=2, column=0, padx=(10,10), pady=(5,10))
+
+        # Make bar plot of objective values
+        frame2 = tk.Frame(self, relief='solid', borderwidth=3)
+        self.fig2 = Figure()
+        self.fig2.suptitle('Model Fit', weight='bold')
+
+        self.ax2 = self.fig2.add_subplot(111)
+        self.ax2.set_xlabel('LM Iteration')
+        self.bar1 = self.ax2.bar(range(30),[init_sse+init_aLm]+29*[0],color='#373f47',
+                                  label='Total objective value')
+        self.bar2 = self.ax2.bar(range(30),[init_sse]+29*[0],color='#6c91c2',
+                                  label='Weighted SSE')
+        self.ax2.legend()
+
+        self.canvas2 = FigureCanvasTkAgg(self.fig2, frame2)
+        self.canvas2.show()
+        self.canvas2.get_tk_widget().pack(side='top', fill='both', expand=1)
+        self.canvas2._tkcanvas.pack(side='top', fill='both', expand=1)
+        frame2.grid(row=2, column=1, padx=(10,10), pady=(5,10))
+
+        # Add text labels for current initial solution and derivative
+        self.calc_var = tk.StringVar(self)
+        self.calc_var.set("")
+        self.calc_lab = tk.Label(self, textvariable=self.calc_var, font=mainapp.font_sections,
+                                 bg=mainapp.Background1)
+        self.calc_lab.grid(row=1, column=0, sticky='w', pady=(5,0), padx=(8,0))
+
+        self.init_var = tk.StringVar(self)
+        self.init_var.set("")
+        self.init_lab = tk.Label(self, textvariable=self.init_var, font=mainapp.font_large,
+                                 bg=mainapp.Background1)
+        self.init_lab.grid(row=0, column=0, columnspan=2, sticky='nswe', pady=(15,15))
+
+        self.update()
 
 
 class InitialSolutions(tk.Frame):
@@ -50,7 +112,7 @@ class InitialSolutions(tk.Frame):
             self.initial_check[i] = tk.Checkbutton(self.container1, textvariable=self.initial_labs[i],
                                                 font=mainapp.font_buttons,
                                                 bg=mainapp.Background1,
-                                                variable=self.initial_vars)
+                                                variable=self.initial_vars[i])
             self.initial_check[i].grid(row=int(i/6)+3, column=i%6, sticky='we', padx=(10,10), pady=(0,4*(int(i/6)==4)))
             self.initial_check[i].grid_remove()
 
@@ -191,20 +253,22 @@ class ErrorFileInputs(tk.Frame):
 
 class InverseModelPage(tk.Frame):
 
+    def create_progwind(self,mainapp,init_sol,init_sse,init_aLm):
+        self.progwind = InverseProgressWindow(mainapp,init_sol,init_sse,init_aLm)
+
+
     def set_numinitial(self,dir_loc):
         list_files=sort(glob.glob(dir_loc+'*.txt'))
         n=len(dir_loc)
-        m=min(len(list_files),30)
+        self.num_initials=min(len(list_files),30)
 
-        for i in range(0,m):
+
+        for i in range(0,self.num_initials):
             self.initsolutions.initial_labs[i].set(list_files[i][n:])
             self.initsolutions.initial_check[i].grid()
 
-        for i in range(m,30):
+        for i in range(self.num_initials,30):
             self.initsolutions.initial_check[i].grid_remove()
-
-
-
 
 
     def set_nummin(self,i,nmin):
@@ -245,6 +309,7 @@ class InverseModelPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         #self.grid_columnconfigure(0, weight=100)
         #self.grid_columnconfigure(2, weight=400)
+        self.num_initials=0
         self.config(bg=parent.Background1)
 
 
