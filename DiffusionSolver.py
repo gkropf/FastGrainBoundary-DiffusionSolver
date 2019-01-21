@@ -7,8 +7,6 @@ from inversemodeldialog import *
 from toolbardialog import *
 
 
-
-
 class FastGrainDiffusionApp(tk.Frame):
 
     def __init__(self,parent):
@@ -16,16 +14,19 @@ class FastGrainDiffusionApp(tk.Frame):
         tk.Frame.__init__(self,parent)
         parent.grid_rowconfigure(0, weight=1)
         parent.grid_columnconfigure(0,weight=1)
-        parent.title('tk ##version 2.0')
+        parent.title('FGB Model')
 
         # Set global visual characteristics
         self.Background1 = '#c5ddeb'
         self.font_inputs = tkFont.Font(family="Helvetica", size=11)
         self.font_sections = tkFont.Font(family="Helvetica", size=11)
-        self.font_labels = tkFont.Font(family="ariel", size=12, weight='bold')
+        self.font_labels = tkFont.Font(family="ariel", size=11, weight='bold')
         self.font_buttons = tkFont.Font(family="Helvetica", size=11)
         self.font_message = tkFont.Font(family='Helvetica', size=11, weight='bold')
-        self.font_mono1 = tkFont.Font(family='monospace', size=12)
+        self.font_mono1 = tkFont.Font(family='monospace', size=11)
+        self.font_mono2 = tkFont.Font(family='monospace', size=11)
+        self.font_mono2.configure(underline=True)
+
 
         self.font_inputs2 = tkFont.Font(family="Helvetica", size=13)
 
@@ -53,11 +54,6 @@ class FastGrainDiffusionApp(tk.Frame):
 
         self.toolbar = ToolBar(self)
         root.config(menu=self.toolbar)
-
-
-
-
-
 
 
 root = tk.Tk()

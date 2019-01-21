@@ -1,11 +1,19 @@
 import time as systime
 from numpy import *
-from numpy import matlib
+from tkinter import ttk
+import pandas
+from scipy import interpolate
+import os
 
+# This is the main diffusion solver function that uses python, this results in a 3d array that has the
+# output at every timestep.
+def forwardmodel_slow(mainapp):
 
-# This is the main diffusion solver function
-def run_forwardmodel(params):
-    start_time = systime.time()
+    #read parameters and create loading bar
+    loadingbar=ttk.Progressbar(mainapp.page1.graphingframe, mode='determinate', length='2i', maximum=1000)
+    loadingbar.grid(row=20, column=0, padx=(5,0), pady=(50,5), sticky='sw')
+    params=mainapp.page1.forwardparams
+    mainapp.update()
 
     def fluxbal(z, e, f, h, j, k, l):
         X = zeros([z])
@@ -134,8 +142,6 @@ def run_forwardmodel(params):
     for m in range(0, nmin):
         if d180[m] == 99:
             Told[m, 0:int(gb[m])] = gbvalinit[m]
-        ###################elseif d18O == 100 %load precursor profile from text file
-        #################### Told(m) = reshape(load(uigetfile('*.txt')),1,1:gb(m))
         else:
             Told[m, 0:int(gb[m])] = d180[m]
 
@@ -146,16 +152,13 @@ def run_forwardmodel(params):
     Tnew = zeros([nmin, int(max(gb))])
     pregbval = zeros([nmin])
     result = zeros([nmin, tend, int(maxdim)])  # array for storing results for all
-    # minerals, indices (m,t,i)
-    DTdt = zeros([tend])
 
-    #loading.config(maximum=int(tend / 10))
+    loadingbar.config(maximum=int(tend / 10))
     for t in range(0, int(tend)):
 
-        if (t % 100 == 0):
-            print(t/int(tend))
-            #loading.step()
-            #root.update()
+        if (t % 10 == 0):
+            loadingbar.step()
+            mainapp.update()
         if params['CoolingType'].get() == "Linear":
             DTdt = (Tstart - Tend) / ttot  # linear in t
             T = T0 - (DTdt * (t + 1) * dt)
@@ -169,7 +172,7 @@ def run_forwardmodel(params):
         D = D0 * exp(-Q / (R * T))
         fracfax = Afac + Bfac * (1e3 / T) + Cfac * (1e6 / pow(T, 2))
         coeff = D / dx
-        ###checked to here good #################################################################################
+
         for m in range(0, nmin):
             if shape[m] == 1:  # spherical/isotropic diffusion geometry
                 gb[m] = math.ceil(r[m] / dx[m]) + 1
@@ -204,6 +207,7 @@ def run_forwardmodel(params):
             result[m, t, 0:int(gb[m])] = Told[m, 0:int(gb[m])]
 
     # create global variables to store results in
+    loadingbar.destroy()
     global yresult, timeresult, xresult
     yresult = result
     xsteps = yresult.shape[2]
@@ -216,11 +220,164 @@ def run_forwardmodel(params):
             yresult[i, :, 0:2 * int(xsteps / 2)] = concatenate((onesidey[:, ::-1], onesidey), axis=1)
         else:
             xresult[:, i] = 1e4 * linspace(dx[i], L[i] - dx[i], xsteps)
-    print(systime.time() - start_time)
 
-    print(array(xresult).shape)
-    print(array(yresult).shape)
-    print(array(timeresult).shape)
+    #print(systime.time() - start_time)
+    #print(array(xresult).shape)
+    #print(array(yresult).shape)
+    #print(array(timeresult).shape)
 
 
     return xresult, yresult, timeresult
+
+
+# This is the main diffusion solver that uses C, this results in a 2d array that has only the last time step.
+def forwardmodel_fast(file_param,cool_array):
+
+    unique_ID=1
+    df=pandas.DataFrame(cool_array)
+    df.to_csv(str(unique_ID)+".txt", sep=",", header=None, index=None)
+
+    os.system("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt")
+
+    #now read input from C code output
+    X=pandas.read_csv(str(unique_ID)+"X.txt", sep=',', header=None).values
+    Y=pandas.read_csv(str(unique_ID)+"Y.txt", sep=',', header=None).values
+
+    #remove text files that have been created
+    os.system("rm 1.txt")
+    os.system("rm 1Y.txt")
+    os.system("rm 1X.txt")
+
+
+    return X, Y
+
+
+
+# These are all the functions for computing the inverse solution
+def calc_single_diffs(xmod, ymod, error_file):
+
+    # compute traverse for file
+    def octrav(error_file):
+        replacedat = pandas.read_csv(error_file, sep=' ', header=None).values
+
+        return replacedat[:,0], replacedat[:,1], replacedat[:,2]
+
+    xactual, yactual, uncert = octrav(error_file)
+
+    # keep only right hand side, and where values are in range of model change to mean for actual
+    ind_keep = [i for i in range(len(xactual)) if xactual[i] > 0 and xactual[i] < xmod[-1]]
+    xactual = xactual[ind_keep]
+    yactual = yactual[ind_keep]
+    uncert = uncert[ind_keep]
+
+    if len(ind_keep)>0:
+        # find interpolation for each point
+        coef=interpolate.splrep(xmod,ymod)
+        y_corr=interpolate.splev(xactual,coef)
+
+        #return differences divided by sigma
+        diff = divide(y_corr-yactual,uncert)
+    else:
+        diff=[]
+
+    return list(diff)
+
+
+def calc_residuals(mainapp,cool_array,reg_alpha):
+
+    # record all difference from each mineral within each sample
+    D_total=[]
+    for i in mainapp.page2.forwardmods:
+
+        # if cool history has negative temps give high residuals
+        if any(cool_array[:,1]<100):
+            fakecool=array([[0,700],[1,500]])
+            xdata, ydata = forwardmodel_fast(mainapp.page2.forwardmodelframe.forwardmodels_var[i].get(), fakecool)
+            ydata = ydata+300
+        else:
+            xdata, ydata = forwardmodel_fast(mainapp.page2.forwardmodelframe.forwardmodels_var[i].get(), cool_array)
+
+        for k in range(0,8):
+            error_file=mainapp.page2.errorfileframe.errfile_var[(i,k)].get()
+            if error_file:
+                D_total=D_total+calc_single_diffs(xdata[:,k],ydata[:,k],error_file)
+
+    residuals=array(D_total).reshape((-1,1))+(.33/25)*(499-min(min(cool_array[:,1]),499))**2
+
+    # compute regularization term for cooling history
+    N = len(residuals)
+    m = len(cool_array)
+
+    #create L matrix to be used as constraint, currently constructed to penalize 2nd derivative
+    L=zeros((m-2,m))
+    for i in range(0,m-2):
+        L[i,i:i+3]=[1, -2, 1]
+
+    #stack to make K vector
+    return vstack((residuals,matmul(reg_alpha*L,cool_array[:,1]).reshape(-1,1)))
+
+
+def calc_jacob(mainapp,cool_array,curr_res,reg_alpha):
+
+    N=len(curr_res)
+    m=len(cool_array)
+    deltac=1;
+
+    J=zeros([N,m-2])
+    for i in range(1,m-1):
+        print('--calc column '+str(i))
+        new_cool=cool_array.copy()
+        new_cool[i,1]=new_cool[i,1]+deltac
+        deriv=(calc_residuals(mainapp,new_cool,reg_alpha)-curr_res)/deltac
+        J[:,i-1]=deriv.reshape(N)
+
+    return J
+
+
+# This function runs the inverse solver for the minerals, initial profiles given
+def find_inverses(mainapp):
+
+    alpha=0.03032227
+    curr_sol=pandas.read_csv('Inverse_InitialSol/Initial01.txt', sep=',', header=None).values
+    curr_res=calc_residuals(mainapp,curr_sol,alpha)
+    curr_obj = sqrt(sum(curr_res ** 2))
+
+    startt=systime.time()
+    #now perform actual LM algorithm
+    step = 0
+    lam = .00125
+    lamstop = 1000
+
+
+    while (lam < lamstop):
+        step = step + 1
+        J = calc_jacob(mainapp, curr_sol, curr_res, alpha)
+        m = len(curr_sol)
+        checkinglam = True
+
+        while ((lam < lamstop) & checkinglam):
+            left = matmul(transpose(J), J) + lam * eye(m - 2)
+            right = -1 * matmul(transpose(J), curr_res)
+            cool_step = linalg.solve(left, right).reshape(m - 2)
+            print('Thse JJ matrix has condition number: ' + str(round(linalg.cond(matmul(transpose(J), J)), 6)))
+            print('-using lam=' + str(lam))
+            new_sol = curr_sol
+            new_sol[1:m - 1, 1] = new_sol[1:m - 1, 1] + cool_step
+            new_res = calc_residuals(mainapp,new_sol,alpha)
+            new_obj = sqrt(sum(new_res ** 2))
+
+            if (new_obj < curr_obj):
+                curr_obj = new_obj
+                curr_sol = new_sol
+                curr_res = new_res
+                lam = .5 * lam
+                checkinglam = False
+            else:
+                lam = 7 * lam
+
+        print('I have completed model step ' + str(step) + ' with a current weighted RMS: ' + str(round(curr_obj, 6)))
+
+    print('This ran in: '+str(systime.time()-startt))
+
+
+

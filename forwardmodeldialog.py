@@ -372,6 +372,7 @@ def FracValueSearch(forwardpage, mainapp, but_num):
         list1=[x[1] for x in fracdata]
         list2=[x[2] for x in fracdata]
         path=find_path(list1,list2,node1,node2)
+        print(path)
 
         # clear all previous elements so new window can be created
         for child in mainwin.winfo_children():
@@ -388,7 +389,8 @@ def FracValueSearch(forwardpage, mainapp, but_num):
             mainwin.destroy()
 
         #place manual button
-        Man=tk.Button(useorenter, text="Enter Manually", relief="groove", bg=mainapp.Background1)
+        Man=tk.Button(useorenter, text="Enter Manually", relief="groove",
+                      font=mainapp.font_buttons, bg=mainapp.Background1)
         Man.bind('<Button-1>', lambda event: enter_manual(but_num))
         Man.grid(row=0, column=2, pady=(0,10))
         useorenter.grid(row=1,column=2)
@@ -396,12 +398,14 @@ def FracValueSearch(forwardpage, mainapp, but_num):
         # check that there is a valid path
         if len(path) < 1:
             direc = tk.Label(mainwin, text='There does not exist any remaining path '
-                                           'of studies that can link this mineral to your monitor.')
+                                           'of studies that can link this mineral to your monitor.',
+                             font=mainapp.font_message)
             direc.config(font=mainapp.font_message, bg=mainapp.Background1)
             direc.grid(row=0, column=2, padx=(10, 10), pady=(10, 10))
             return
         else:
-            direc = tk.Label(mainwin, text='I have the following conversions available for mineral --> monitor')
+            direc = tk.Label(mainwin, text='I have the following conversions available for mineral --> monitor',
+                             font=mainapp.font_message)
             direc.config(font=mainapp.font_message, bg=mainapp.Background1)
             direc.grid(row=0, column=1, pady=(0, 0), columnspan=1)
             sep_top = tk.Label(mainwin, text="-" * 66)
@@ -497,9 +501,9 @@ def FracValueSearch(forwardpage, mainapp, but_num):
         for jump in range(0, m):
             # create label for current step
             step_lab[jump] = tk.Label(mainwin, text=fracdata[abs(allpaths[jump][0])][1] + ' --> ' +
-                                                 fracdata[abs(allpaths[jump][0])][2])
-            step_lab[jump].grid(row=rowtrack, column=1, sticky='w')
-            step_lab[jump].config(font=("helvetica", 11, "bold"), bg=mainapp.Background1)
+                                      fracdata[abs(allpaths[jump][0])][2], font=mainapp.font_labels)
+            step_lab[jump].grid(row=rowtrack, column=1, sticky='w', pady=(10,0))
+            step_lab[jump].config(bg=mainapp.Background1)
             rowtrack = rowtrack + 1
 
             # create buttons for each option for current step
@@ -524,7 +528,7 @@ def FracValueSearch(forwardpage, mainapp, but_num):
                 # note button and place
                 notes_but[jump][jumpchoice] = tk.Label(mainwin, text="---", font=mainapp.font_mono1, relief="groove",
                                                     bg=mainapp.Background1)
-                notes_but[jump][jumpchoice].grid(row=rowtrack, column=2, padx=(8, 0), sticky='nsw')
+                notes_but[jump][jumpchoice].grid(row=rowtrack, column=2, padx=(4, 8), sticky='nsw')
 
                 # make all appropriate path binds
                 path_opt[jump][jumpchoice].bind('<Enter>', lambda event, i=jump, j=jumpchoice: change_to(i, j))
@@ -575,9 +579,10 @@ def FracValueSearch(forwardpage, mainapp, but_num):
         #create two final buttons
         fin_but=dict()
         fin_but[1]=tk.Button(useorenter, text="Use Current Mineral Studies Chosen",
-                             bg=mainapp.Background1, command=use_curr)
+                             bg=mainapp.Background1, font=mainapp.font_buttons, command=use_curr)
         fin_but[1].config(state='disabled')
-        fin_but[2]=tk.Button(mainwin, text="Remove", bg=mainapp.Background1,command=lambda: rem_curr(fracdata))
+        fin_but[2]=tk.Button(mainwin, text="Remove", bg=mainapp.Background1,
+                             font=mainapp.font_buttons, command=lambda: rem_curr(fracdata))
 
 
         #place buttons
@@ -592,7 +597,7 @@ def FracValueSearch(forwardpage, mainapp, but_num):
 
 
     # Create window with first options
-    a='FractionationFactorsR.csv'
+    a='ParameterTables/FractionationFactorsR.csv'
     fractiondata=pandas.read_csv(a, header=None).values.astype('str')
     n=len(fractiondata)
 
@@ -617,10 +622,90 @@ def DiffValueSearch(forwardpage, mainapp, but_num):
     def enter_manual(num):
         forwardpage.rockcharframe.diffparam1_input[num].config(state='normal')
         forwardpage.rockcharframe.diffparam2_input[num].config(state='normal')
+        mainwin.destroy()
 
-        #mainwin.destroy()
+    #used when we wish to input parameters from selected table entry
+    def enter_table(num):
+        Ea=diffdata[num,5]
+        if Ea=='nan':
+            forwardpage.rockcharframe.diffparam2_vars[but_num].set('0')
+        else:
+            forwardpage.rockcharframe.diffparam2_vars[but_num].set(Ea)
+        forwardpage.rockcharframe.diffparam1_vars[but_num].set(diffdata[num,6])
+        mainwin.destroy()
 
-    enter_manual(but_num)
+
+
+
+    # read in file with diffusivities and initialize
+    a='ParameterTables/ODiffusionR.csv'
+    diffdata=pandas.read_csv(a, header=None).values.astype('str')
+    mineralname=forwardpage.forwardparams['Min'+str(but_num)+'-Name'].get()
+    n=len(diffdata)
+
+    # search for all entries in file with given mineral name
+    if len(mineralname)>0:
+        loc_min=[i for i in range(0,n) if mineralname.lower() in diffdata[i,1].lower()]
+        loc_min=[0]+loc_min
+    else:
+        loc_min=[]
+
+
+
+    # create first window of options
+    mainwin = tk.Toplevel()
+    mainwin.wm_title('Find Diffusivity Parameters')
+    mainwin.config(bg=mainapp.Background1)
+
+    #create manual button and label
+    win_caption = tk.Label(mainwin, text='' + mineralname,
+                           bg=mainapp.Background1, font=mainapp.font_labels)
+    ButtonMan = tk.Button(mainwin, text="Enter Manually", relief="groove",
+                          bg=mainapp.Background1, font=mainapp.font_buttons)
+    ButtonMan.bind('<Button-1>', lambda event: enter_manual(but_num))
+
+    # Create menu of optional diffusion parameters to use
+    m=len(loc_min)
+    if m<1:
+
+        win_caption.config(text='I have no available data for'+mineralname)
+        #place items
+        win_caption.grid(row=0, column=1, padx=(10,10), pady=(10,10))
+        ButtonMan.grid(row=1, column=1, pady=(0,10))
+
+    else:
+        win_caption.config(text='I have the following table entries for '+mineralname+':')
+
+        #keep only those element we are interested in
+        colskeep=[1,2,3,4,6,5,8,10]
+        datakeep=diffdata[loc_min,:]
+        datakeep=datakeep[:,colskeep]
+
+        #for each column make all text match maximum amount of white space
+        for k in range(0,8):
+            maxlength=max([len(datakeep[i,k]) for i in range(0,m)])
+            for i in range(0,m):
+                datakeep[i,k]=datakeep[i,k]+(maxlength+5-len(datakeep[i,k]))*' '
+
+        #now that all text is same length, make buttons
+        ChoiceButtons=dict()
+        for i in range(0,m):
+            ChoiceButtons[i]=tk.Button(mainwin, text=''.join(datakeep[i,:]),
+                          bg=mainapp.Background1, font=mainapp.font_mono1, relief='groove')
+            ChoiceButtons[i].grid(row=i+2, column=1, sticky='nswe', padx=(10,10), pady=(10*(i<1),10*(i<1)))
+            if (i>0):
+                ChoiceButtons[i].bind('<Button-1>', lambda event, i=i: enter_table(loc_min[i]))
+
+        ChoiceButtons[0].config(relief='flat',activebackground=mainapp.Background1, font=mainapp.font_mono2)
+
+
+        #place other elements
+        win_caption.grid(row=1,column=0,columnspan=9)
+        tk.Label(mainwin,text='----------------------------------------', bg=mainapp.Background1,
+                 font=mainapp.font_buttons).grid(row=m+2,column=1,pady=(1,1))
+        ButtonMan.grid(row=m+3, column=1,pady=(0,5))
+
+
 
 
 def PlotGraphs(forwardpage):

@@ -1,37 +1,109 @@
 import tkinter as tk
 from tkinter import filedialog
 from numpy import *
+import glob
 
 
 
 
+class InitialSolutions(tk.Frame):
+
+    def loaddir(self,inversepage):
+        dir_loc=tk.filedialog.askdirectory()+'/'
+        self.folder_var.set(dir_loc)
+        inversepage.set_numinitial(dir_loc)
+
+
+
+    def __init__(self,parent,mainapp):
+        tk.Frame.__init__(self, parent)
+        self.config(bg=mainapp.Background1)
+
+        self.head=tk.Label(self,text='Initial Solutions',bg=mainapp.Background1, font=mainapp.font_labels)
+        self.head.grid(row=0, column=0, sticky='w', pady=(15,5), padx=(4,0))
+
+        #make input folder selector
+        self.folder_var = tk.StringVar(self)
+        self.folder_var.set("Directory Location")
+
+        self.folder_lab = tk.Label(self, textvariable=self.folder_var,
+                                             anchor='w', font=mainapp.font_inputs)
+        self.folder_lab.configure(bg='white', relief='sunken', height=1,
+                                            width=110)
+        self.folder_lab.grid(row=1, column=0, padx=(10, 0), pady=(0,4))
+
+        self.folder_lab.bind("<Enter>", lambda event: self.folder_lab.configure(bg='#dbdbdb'))
+        self.folder_lab.bind("<Leave>", lambda event: self.folder_lab.configure(bg='white'))
+        self.folder_lab.bind("<Button-1>", lambda event: self.loaddir(parent))
+
+        #make check marks for each possible solution
+        self.container1=tk.Frame(self)
+        self.container1.config(bg=mainapp.Background1)
+        self.container1.grid(row=3, column=0)
+
+        self.initial_vars=dict()
+        self.initial_check=dict()
+        self.initial_labs=dict()
+        for i in range(0,6*5):
+            self.initial_vars[i]=tk.IntVar(self)
+            self.initial_labs[i]=tk.StringVar(self)
+            self.initial_check[i] = tk.Checkbutton(self.container1, textvariable=self.initial_labs[i],
+                                                font=mainapp.font_buttons,
+                                                bg=mainapp.Background1,
+                                                variable=self.initial_vars)
+            self.initial_check[i].grid(row=int(i/6)+3, column=i%6, sticky='we', padx=(10,10), pady=(0,4*(int(i/6)==4)))
+            self.initial_check[i].grid_remove()
+
+        # make selection of C code option and smooth parameter
+        self.container2=tk.Frame(self)
+        self.container2.config(bg=mainapp.Background1)
+        self.container2.grid(row=1, column=1, padx=(60,5))
+
+        self.useC_var=tk.IntVar()
+        self.useC_check=tk.Checkbutton(self.container2, text='Use Compiled C Code',
+                                                font=mainapp.font_buttons,
+                                                bg=mainapp.Background1,
+                                                variable=self.useC_var)
+        self.useC_check.grid(row=0, column=0, sticky='n')
+
+
+
+
+
+
+    print('\n')
 
 
 class ForwardModelInputs(tk.Frame):
 
     def loadmodel(self,inversepage,n):
 
-        file_loc = filedialog.askopenfilename(filetypes=(("Model File", ".npz"), ("all files", "*.*")),
-                                              defaultextension=".npz")
+        file_loc = filedialog.askopenfilename(filetypes=(("Model File", ".txt"), ("all files", "*.*")),
+                                              defaultextension=".txt")
         if file_loc:
             self.forwardmodels_var[n].set(file_loc)
-            npzfile = load(file_loc)
-            numminerals = npzfile['arr_0'].shape[1]
-            inversepage.set_nummin(n,numminerals)
+            inversepage.forwardmods[n]=dict()
+            f=open(file_loc,'r')
+
+            # get number of minerals from first line of file
+            num_min=f.readline().strip().split(',')[1]
+            inversepage.forwardmods[n]['NumMinerals']=num_min
+
+            # read in all other lines as a dictionary
+            for i in range(0,7+int(num_min)*11-1):
+                line=f.readline().strip()
+                (key,val)=line.split(',')
+                inversepage.forwardmods[n][key]=val
+
+            inversepage.set_nummin(n,int(num_min))
 
         print('\n')
-
 
 
 
     def __init__(self,parent,mainapp):
         tk.Frame.__init__(self,parent)
         self.config(bg=mainapp.Background1)
-
-        #self.grid_columnconfigure(0, weight=1)
-        #for i in range(0,5):
-        #    self.grid_rowconfigure(i, weight=1)
-
 
         tk.Label(self, text='Forward Models', font=mainapp.font_labels,
                  bg=mainapp.Background1).grid(row=0, column=1, padx=(4,0), pady=(4,0))
@@ -59,7 +131,7 @@ class ForwardModelInputs(tk.Frame):
             self.forwardmodels_lab[i].bind("<Button-1>", lambda event, i=i: self.loadmodel(parent,i))
 
 
-        # Create line earase buttons
+        # Create line erase buttons
         for i in range(0,5):
             self.delline=tk.Label(self, text='X', bg=mainapp.Background1, relief='raised')
             self.delline.grid(row=i+1, column=0, padx=(4,0))
@@ -119,6 +191,21 @@ class ErrorFileInputs(tk.Frame):
 
 class InverseModelPage(tk.Frame):
 
+    def set_numinitial(self,dir_loc):
+        list_files=sort(glob.glob(dir_loc+'*.txt'))
+        n=len(dir_loc)
+        m=min(len(list_files),30)
+
+        for i in range(0,m):
+            self.initsolutions.initial_labs[i].set(list_files[i][n:])
+            self.initsolutions.initial_check[i].grid()
+
+        for i in range(m,30):
+            self.initsolutions.initial_check[i].grid_remove()
+
+
+
+
 
     def set_nummin(self,i,nmin):
 
@@ -154,8 +241,6 @@ class InverseModelPage(tk.Frame):
 
 
 
-
-
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         #self.grid_columnconfigure(0, weight=100)
@@ -171,4 +256,12 @@ class InverseModelPage(tk.Frame):
 
         self.errorfileframe = ErrorFileInputs(self,parent)
         self.errorfileframe.grid(row=0, column=1, sticky='nsew')
+
+        tk.Label(self, text='-----------------', bg=parent.Background1).grid(row=1, columnspan=2)
+
+        self.initsolutions = InitialSolutions(self,parent)
+        self.initsolutions.grid(row=1, column=0, columnspan=2, sticky='nswe')
+
+        # make list of dictionaries to store forward models in
+        self.forwardmods=dict()
 

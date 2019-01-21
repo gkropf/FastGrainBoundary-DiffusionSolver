@@ -9,7 +9,7 @@ def runcommand(main):
 
     # If on first tab set model output to page 1 so that they can be used by graph button
     if curr_tab==0:
-        x, y, t = run_forwardmodel(main.page1.forwardparams)
+        x, y, t = forwardmodel_slow(main)
         main.page1.xarray=array(x)
         main.page1.yarray=array(y)
         main.page1.tarray=array(t)
@@ -18,14 +18,10 @@ def runcommand(main):
 
 
     if curr_tab==1:
-        print('working on it 1')
+        find_inverses(main)
 
     if curr_tab==2:
         print('working on it 2')
-
-
-
-    print('run the model and save in global')
 
 
 def loadparameters(main):
@@ -49,6 +45,12 @@ def loadparameters(main):
 
         # Set the number of mineral's
         main.page1.setnummin(main.page1.forwardparams['NumMinerals'].get())
+
+    if curr_tab==1 and file_loc:
+        print('working on it 1')
+
+    if curr_tab==2 and file_loc:
+        print('working on it 2')
 
 
 def saveparameters(main):
@@ -93,6 +95,9 @@ def exportmodelrun(main):
     if curr_tab == 1:
         print('Export inverse model run')
 
+    if curr_tab == 2:
+        print('working on it')
+
     print('\n')
 
 
@@ -112,6 +117,11 @@ def importmodelrun(main):
         main.page1.setnummin(main.page1.xarray.shape[1])
         main.page1.setnumgraphs(main.page1.xarray.shape[1])
 
+    if curr_tab == 1:
+        print('Export inverse model run')
+
+    if curr_tab == 2:
+        print('working on it')
 
 
     print('\n')
@@ -141,9 +151,6 @@ def increasefont(main):
     main.font_mono1.configure(size=size+incr)
 
 
-
-
-
 def decreasefont(main):
 
     # Update all font sizes
@@ -166,8 +173,6 @@ def decreasefont(main):
 
     size = main.font_mono1['size']
     main.font_mono1.configure(size=size + incr)
-
-
 
 
 
