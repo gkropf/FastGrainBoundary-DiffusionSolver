@@ -1,10 +1,10 @@
 # Oxygen Isotope Diffusion Solver
 
-This application simulates the Fast Grain Boundary (FGB) model for isotope diffusion. It provides a GUI interface for inputing all mineral parameters and provides several graphing options along with the ability to export the model solution data to a .csv file. Search menus are provided for convenient referencing of diffusion parameters and fractionation factors. Additionally, the application is equipped with an inversion scheme that can be used to recover thermal histories of mineral samples using isotope zoning profiles. This allows the recovery of high temperature histories not achievable with other commercially available software packages such as HeFTy and QtQt.
+This application simulates the Fast Grain Boundary (FGB) model for isotope diffusion. It provides a GUI interface for inputing all mineral parameters and provides several graphing options along with the ability to export the model solution data to a .csv file. Search menus are provided for convenient referencing of diffusion parameters and fractionation factors. 
+
+Additionally, the application is equipped with an inversion scheme that can be used to recover thermal histories of mineral samples using isotope zoning profiles. This allows the recovery of high temperature histories not achievable with other commercially available software packages such as HeFTy and QtQt.
 
 For a complete description of the model and detailed analysis of the inverse techniques involved, please see the author's thesis entitled "THERMAL HISTORY INVERSION USING THE FAST GRAIN BOUNDARY MODEL OF DIFFUSION." Paper pending.
-
-This material is based upon work supported by the National Science Foundation under Grant Number 1650355.
 
 
 ## Getting Started
@@ -72,4 +72,6 @@ Finally, we will click File->Run. At each iteration of the process, the left pan
 
 ![alt text](Screenshots/Screen10-invdialog.png "")
 
+## Project Support
+This material is based upon work supported by the National Science Foundation under Grant Number 1650355.
 
