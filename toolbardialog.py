@@ -177,7 +177,6 @@ def decreasefont(main):
 
 
 
-
 class ToolBar(tk.Menu):
 
     def __init__(self, parent):

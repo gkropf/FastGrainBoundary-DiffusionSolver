@@ -425,6 +425,7 @@ def find_inverses(mainapp):
             # Get magnitude of final gradient function
             K=calc_jacob(mainapp,final_sol,calc_residuals(mainapp,final_sol,alpha),alpha,past_sse,past_aLm)
             Kmag=linalg.norm(matmul(transpose(K),final_res))
+            mainapp.page2.progwind.destroy()
 
 
 

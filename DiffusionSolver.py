@@ -16,18 +16,18 @@ class FastGrainDiffusionApp(tk.Frame):
         parent.grid_columnconfigure(0,weight=1)
         parent.title('FGB Model')
 
-        # Set global visual characteristics
+        # Set global visual characteristics 
         self.Background1 = '#c5ddeb'
         self.font_inputs = tkFont.Font(family="Helvetica", size=11)
         self.font_sections = tkFont.Font(family="Helvetica", size=11)
-        self.font_labels = tkFont.Font(family="ariel", size=11, weight='bold')
-        self.font_buttons = tkFont.Font(family="Helvetica", size=11)
-        self.font_message = tkFont.Font(family='Helvetica', size=11, weight='bold')
+        self.font_labels = tkFont.Font(family="monospace", size=11, weight='bold')
+        self.font_buttons = tkFont.Font(family="monospace", size=11)
+        self.font_message = tkFont.Font(family='monospace', size=11, weight='bold')
         self.font_mono1 = tkFont.Font(family='monospace', size=11)
         self.font_mono2 = tkFont.Font(family='monospace', size=11)
         self.font_mono2.configure(underline=True)
-        self.font_inputs2 = tkFont.Font(family="Helvetica", size=13)
-        self.font_large = tkFont.Font(family="ariel", size=16, weight='bold')
+        self.font_inputs2 = tkFont.Font(family="monospace", size=13)
+        self.font_large = tkFont.Font(family="monospace", size=16, weight='bold')
 
 
 
@@ -48,6 +48,7 @@ class FastGrainDiffusionApp(tk.Frame):
 
         self.page3 = tk.Frame()
         self.maintabs.add(self.page3, text='Temp History')
+
 
         self.toolbar = ToolBar(self)
         root.config(menu=self.toolbar)

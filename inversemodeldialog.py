@@ -167,7 +167,7 @@ class ForwardModelInputs(tk.Frame):
         tk.Frame.__init__(self,parent)
         self.config(bg=mainapp.Background1)
 
-        tk.Label(self, text='Forward Models', font=mainapp.font_labels,
+        tk.Label(self, text='Model Parameters', font=mainapp.font_labels,
                  bg=mainapp.Background1).grid(row=0, column=1, padx=(4,0), pady=(4,0))
         tk.Frame(self, width=2, bg='black').grid(row=1, column=2, sticky='ns',
                                                  rowspan=5, padx=(3, 3))

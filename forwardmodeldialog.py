@@ -81,26 +81,26 @@ class ModelCharFrame(tk.LabelFrame):
 
 
         # Place all model characteristics elements.
-        self.numminerals_label.grid(row=0, column=1, sticky='nse')
-        self.numminerals_input.grid(row=0, column=2, stick='nswe')
+        self.numminerals_label.grid(row=0, column=1, sticky='nse', padx=(5,5), pady=(7,1.5))
+        self.numminerals_input.grid(row=0, column=2, stick='nswe', padx=(5,10), pady=(7,1.5))
 
-        self.coolingtype_label.grid(row=1, column=1, sticky='nse')
-        self.coolingtype_input.grid(row=1, column=2, sticky='nswe')
+        self.coolingtype_label.grid(row=1, column=1, sticky='nse', padx=(5,5), pady=(1.5,1.5))
+        self.coolingtype_input.grid(row=1, column=2, sticky='nswe', padx=(5,10), pady=(1.5,1.5))
 
-        self.wholerock_label.grid(row=2, column=1, sticky='nse')
-        self.wholerock_input.grid(row=2, column=2, sticky='nswe')
+        self.wholerock_label.grid(row=2, column=1, sticky='nse', padx=(5,5),pady=(1.5,4))
+        self.wholerock_input.grid(row=2, column=2, sticky='nswe', padx=(5,10), pady=(1.5,4))
 
-        self.modelduration_label.grid(row=0, column=3, sticky='nse')
-        self.modelduration_input.grid(row=0, column=4, sticky='nswe')
+        self.modelduration_label.grid(row=0, column=3, sticky='nse', padx=(5,5), pady=(4,1.5))
+        self.modelduration_input.grid(row=0, column=4, sticky='nswe', padx=(5,5), pady=(4,1.5))
 
-        self.starttemp_label.grid(row=1, column=3, sticky='nse')
-        self.starttemp_input.grid(row=1, column=4, sticky='nswe')
+        self.starttemp_label.grid(row=1, column=3, sticky='nse', padx=(5,5), pady=(1.5,1.5))
+        self.starttemp_input.grid(row=1, column=4, sticky='nswe', padx=(5,5), pady=(1.5,1.5))
 
-        self.timestep_label.grid(row=0, column=5, sticky='nse')
-        self.timestep_input.grid(row=0, column=6, sticky='nswe')
+        self.timestep_label.grid(row=0, column=5, sticky='nse', padx=(5,5), pady=(7,1.5))
+        self.timestep_input.grid(row=0, column=6, sticky='nswe', padx=(5,5), pady=(7,1.5))
 
-        self.endtemp_label.grid(row=1, column=5, sticky='nse')
-        self.endtemp_input.grid(row=1, column=6, sticky='nswe')
+        self.endtemp_label.grid(row=1, column=5, sticky='nse', padx=(5,5), pady=(1.5,1.5))
+        self.endtemp_input.grid(row=1, column=6, sticky='nswe', padx=(5,5), pady=(1.5,1.5))
 
 
 class RockCharFrame(tk.LabelFrame):
@@ -110,6 +110,7 @@ class RockCharFrame(tk.LabelFrame):
         self.config(bg=mainapp.Background1)
         self.config(text='Mineral Properties')
         self.config(font=mainapp.font_sections)
+        tk.Frame(self).grid(row=20,column=0,columnspan=4,pady=(0,5))
 
 
         c_labels=['Monitor','Sample 2', 'Sample 3','Sample 4', 'Sample 5', 'Sample 6', 'Sample 7','Sample 8']
@@ -259,6 +260,7 @@ class RockCharFrame(tk.LabelFrame):
                                               font=mainapp.font_inputs, state='disabled',
                                               width=6)
 
+        
         self.diffsearch=dict()
         for i in range(0,8):
             self.diffsearch[i]=tk.Button(self, text='Diff'+str(i+1), command=lambda i=i:
@@ -277,6 +279,7 @@ class RockCharFrame(tk.LabelFrame):
 
             self.oxcon_inputs[i]=tk.Entry(self, textvariable=self.oxcon_vars[i],
                                           font=mainapp.font_inputs, width=6)
+
 
 
 class GraphingFrame(tk.LabelFrame):
@@ -309,11 +312,11 @@ class GraphingFrame(tk.LabelFrame):
                                           bg = mainapp.Background1,
                                           variable=self.plotall_chkvar,
                                           state='disabled')
-        self.plotall_check.grid(row=9, column=0, stick='nsw')
+        self.plotall_check.grid(row=9, column=0, stick='nsw', padx=(5,0))
         self.plotall_var=tk.StringVar(parent)
         self.plotall_input=tk.Entry(self, textvariable=self.plotall_var,
                                     font=mainapp.font_inputs)
-        self.plotall_input.grid(row=10, column=0, sticky='nsw')
+        self.plotall_input.grid(row=10, column=0, sticky='nsw', padx=(11,0))
 
         self.plot=tk.Button(self, text='Produce Plots', font=mainapp.font_buttons,
                             command=lambda: PlotGraphs(parent))
@@ -792,8 +795,8 @@ class ForwardModelPage(tk.Frame):
             self.rockcharframe.oxcon_inputs[i].grid(row=i+1,column=13, sticky='nsew')
 
 
-            self.graphingframe.plotsingle_check[i].grid(row=2*int(i/2), column=i%2, sticky='nsw')
-            self.graphingframe.plotsingle_input[i].grid(row=2*int(i/2)+1, column=i%2, sticky='nsw')
+            self.graphingframe.plotsingle_check[i].grid(row=2*int(i/2), column=i%2, sticky='nsw', padx=(5,0))
+            self.graphingframe.plotsingle_input[i].grid(row=2*int(i/2)+1, column=i%2, sticky='nsw', padx=(11,0))
 
         for i in range(int(n),8):
             self.rockcharframe.column_labels[i].grid_remove()
@@ -831,6 +834,7 @@ class ForwardModelPage(tk.Frame):
 
     def __init__(self,parent):
         tk.Frame.__init__(self,parent)
+        self.config(bg=parent.Background1)
 
         # Set weights for all rows and columns in frame
         for i in range(0,2):
@@ -842,15 +846,15 @@ class ForwardModelPage(tk.Frame):
         # Create three main sections of forward model tab.
 
         self.modelcharframe = ModelCharFrame(self,parent)
-        self.modelcharframe.grid(row=0, column=0, sticky='nsew')
+        self.modelcharframe.grid(row=0, column=0, sticky='nsew', padx=(3,3), pady=(3,3))
 
         self.rockcharframe = RockCharFrame(self, parent)
-        self.rockcharframe.grid(row=1, column=0, sticky='nsew')
+        self.rockcharframe.grid(row=1, column=0, sticky='nsew', padx=(3,3), pady=(3,3))
 
         self.graphingframe = GraphingFrame(self, parent)
-        self.graphingframe.grid(row=0, column=1, rowspan=2, sticky='nsew')
+        self.graphingframe.grid(row=0, column=1, rowspan=2, sticky='nsew', padx=(3,3), pady=(3,3))
 
-        self.setnummin(4)
+        self.setnummin(2)
         self.setnumgraphs(0)
 
         # Create dicationary of all forward model parameters to be set and read for
