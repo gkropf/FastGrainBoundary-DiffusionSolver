@@ -1,10 +1,11 @@
 # Oxygen Isotope Diffusion Solver
 
-This application simulates the Fast Grain Boundary (FGB) model for isotope diffusion. It provides a GUI interface for inputing all mineral parameters and provides several graphing options along with the ability to export the model solution data to a .csv file. Search menus are provided for convenient referencing of diffusion parameters and fractionation factors.
+This application simulates the Fast Grain Boundary (FGB) model for isotope diffusion. It provides a GUI interface for inputing all mineral parameters and provides several graphing options along with the ability to export the model solution data to a .csv file. Search menus are provided for convenient referencing of diffusion parameters and fractionation factors. 
 
 Additionally, the application is equipped with an inversion scheme that can be used to recover thermal histories of mineral samples using isotope zoning profiles. This allows the recovery of high temperature histories not achievable with other commercially available software packages such as HeFTy and QtQt.
 
-For a complete description of the model and detailed analysis of the inverse techniques involved, please see the author's thesis entitled "THERMAL HISTORY INVERSION USING THE FAST GRAIN BOUNDARY MODEL OF DIFFUSION." Paper under construction.
+For a complete description of the model and detailed analysis of the inverse techniques involved, please see the author's thesis entitled "THERMAL HISTORY INVERSION USING THE FAST GRAIN BOUNDARY MODEL OF DIFFUSION." Paper pending.
+
 
 ## Getting Started
 
@@ -60,12 +61,17 @@ By clicking on the rows of section 'Model Parameters' in the tab 'Inverse Model'
 ![alt text](Screenshots/Screen07-invparams.png "")
 
 Each one of these parameter files is setup to simulate the diffusive exchange between four minerals: quartz, feldspar, titanite, and augite. However, for each one we only have data available for the third mineral, titanite. Thus, we will upload our example data Ex_Data1.txt through Ex_Data4.txt, in the top four rows of the column 'Mineral 3.' 
-![alt text](Screenshots/Screen08-data.png "")
+
+![alt text](Screenshots/Screen08-invdata.png "")
+
 Finally, we will need to select which starting solutions we wish to use for our multi-start Levenberg-Marquardt algorithm. Click on the 'directory location' file dialog and select the Inverse_InitialSol folder. We will then elect to use Initial09.txt as our starting solution.
+
 ![alt text](Screenshots/Screen09-invinitial.png "")
+
 Finally, we will click File->Run. At each iteration of the process, the left panel will show the initial solution in a black dashed line, and the current solution will be shown in blue. The right panel will show all the past objective values (measure of data fit and smoothness) will be shown in the bar plot on the right.
+
 ![alt text](Screenshots/Screen10-invdialog.png "")
 
-#### Project Support
+## Project Support
 This material is based upon work supported by the National Science Foundation under Grant Number 1650355.
 
