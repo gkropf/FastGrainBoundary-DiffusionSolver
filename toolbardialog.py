@@ -188,8 +188,8 @@ class ToolBar(tk.Menu):
         filemenu.add_command(label='Run', command=lambda: runcommand(parent))
         filemenu.add_command(label='Load Parameters', command=lambda: loadparameters(parent))
         filemenu.add_command(label='Save Parameters', command=lambda: saveparameters(parent))
-        filemenu.add_command(label='Import Model Run', command=lambda: importmodelrun(parent))
-        filemenu.add_command(label='Export Model Run', command=lambda: exportmodelrun(parent))
+        #filemenu.add_command(label='Import Model Run', command=lambda: importmodelrun(parent))
+        #filemenu.add_command(label='Export Model Run', command=lambda: exportmodelrun(parent))
 
         viewmenu = tk.Menu(self, tearoff=0)
         viewmenu.add_command(label='Increase Font Size', command=lambda: increasefont(parent))
