@@ -26,7 +26,8 @@ The arrays from the forward model will be saved w naming conventions based on th
 if __name__ == "__main__":
 
     # root path
-    root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
+    #root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
+    root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
 
     for dir in os.listdir(root):
         print(dir)
@@ -36,6 +37,7 @@ if __name__ == "__main__":
 
         fwd_model_params = make_params_dict(params=param_path)
 
+        print('running the slow model')
         xresult, yresult, timeresult = forward_model_slow_bulk(fwd_model_params)
 
         # Save each array as a .npy file

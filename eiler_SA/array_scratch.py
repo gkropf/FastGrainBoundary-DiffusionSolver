@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 # ============= standard library imports ========================
 from eiler_SA.forwardmodeling_sa import make_params_dict, generate_synthetic_data, write_params_file
 
-root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
+#root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
+root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
 
 # year in MA we want to see
 year_ma = 44
@@ -30,11 +31,11 @@ year_index = int(round(((year_ma / time_step) - 1), 1))
 
 print('year index {}'.format(year_index))
 
-x_path = os.path.join(root, 'eiler94_p1_h9_x.npy')
-y_path = os.path.join(root, 'eiler94_p1_h9_y.npy')
-time_path = os.path.join(root, 'eiler94_p1_h9_time.npy')
+x_path = os.path.join(root, 'Eiler94_Amphibolite_x.npy')
+y_path = os.path.join(root, 'Eiler94_Amphibolite_y.npy')
+time_path = os.path.join(root, 'Eiler94_Amphibolite_time.npy')
 
-param_path = os.path.join(root, 'eiler94_p1_h9.txt')
+param_path = os.path.join(root, 'Eiler94_Amphibolite.txt')
 param_dict = make_params_dict(param_path)
 
 x_arr = np.load(x_path)
@@ -45,7 +46,7 @@ print('x shape: {}, y shape {}, t shape {}'.format(x_arr.shape, y_arr.shape, t_a
 
 # quartz
 plt.plot(x_arr[:, 0], y_arr[0, year_index, :])
-plt.show()
+#plt.show()
 
 # TODO - construct inverse thingy
 
@@ -62,13 +63,26 @@ plt.show()
 x_quartz = x_arr[:, 0]
 # print(x_quartz)
 y_quartz = y_arr[0, year_index, :]
-sample_locations = [1000, 1250, 1500, 1750, 2000]
+
+x_plag = x_arr[:, 1]
+y_plag = y_arr[1, year_index, :]
+
+x_horn = x_arr[:, 2]
+y_horn = y_arr[2, year_index, :]
+
+x_mag = x_arr[:, 3]
+y_mag = y_arr[3, year_index, :]
+
+quartz_sample_locations = [1500, 1600, 1700, 1800, 1900, 2000]
+plag_sample_locations = [2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000]
+horn_sample_locations = [3500, 3600, 3700, 3800, 3900, 4000]
+mag_sample_locations = [400, 500, 600]
 
 output_location = root
 
-name = 'p1_h9'
+name = 'Eiler94_Amphibolite_plag_lownoise'
 
-generate_synthetic_data(x_arr=x_quartz, y_arr=y_quartz, noise=0.2, sample_locations=sample_locations,
+generate_synthetic_data(x_arr=x_plag, y_arr=y_plag, noise=0.01, sample_locations=plag_sample_locations,
                         output_location=output_location, output_name=name)
 
 

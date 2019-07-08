@@ -20,9 +20,10 @@ import matplotlib.pyplot as plt
 from eiler_SA.forwardmodeling_sa import make_params_dict, generate_synthetic_data, write_params_file
 
 
-root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
+# root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
+root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
 
-rname = 'eiler94_p9_h1'
+rname = 'Eiler94_Amphibolite'
 
 # years in MA we want to see
 year_ma = [10, 20, 45]

@@ -19,7 +19,7 @@ from eiler_SA.forwardmodeling_sa import make_params_dict, write_params_file
 
 if __name__ == "__main__":
 
-    chloe_model_params = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/Eiler94_Amphibolite.txt'
+    chloe_model_params = '/home/dan/Documents/Eiler_94/eiler_forward_params/Eiler94_Amphibolite.txt'
 
     output = os.path.split(chloe_model_params)[0]
 

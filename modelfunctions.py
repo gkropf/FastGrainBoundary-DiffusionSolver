@@ -235,10 +235,11 @@ def forwardmodel_slow(mainapp):
 # This is the main diffusion solver that uses C, this results in a 2d array that has only the last time step.
 def forwardmodel_fast(file_param,cool_array):
 
+    print('file param {}'.format(file_param))
     unique_ID=1
     df=pandas.DataFrame(cool_array)
     df.to_csv(str(unique_ID)+".txt", sep=",", header=None, index=None)
-
+    print('this is the command \n {}'.format("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt"))
     os.system("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt")
 
     #now read input from C code output

@@ -23,9 +23,6 @@ import os
 # ============= standard library imports ========================
 from modelfunctions import forwardmodel_fast, forwardmodel_slow, find_inverses
 
-
-
-
 def forward_model_slow_bulk(params):
 
     """
@@ -331,10 +328,11 @@ def generate_synthetic_data(x_arr, y_arr, noise, sample_locations, output_locati
     xvals = array(xvals)
 
     # Add noise
-    #
+    # random.normal(center of normal ditribution, std deviation of normal distribution, size of arr)
     noise_arr = random.normal(0.0, noise, len(yvals))
     print('noise arr \n {}'.format(noise_arr))
-    yvals_noise = yvals + (yvals * noise_arr)
+    # you add the noise based on analytical uncertainty 0.28 (1st std dev) parts per thousand (less in the future)
+    yvals_noise = yvals + noise_arr
     print('noisy yvals \n {}'.format(yvals_noise))
 
     uncertainty = full(noise_arr.shape, noise)
@@ -350,10 +348,6 @@ def generate_synthetic_data(x_arr, y_arr, noise, sample_locations, output_locati
             wfile.write('{} {} {}\n'.format(d, o, un))
 
     print('done writing to {}'.format(wfilepath))
-
-
-
-
 
 
 if __name__ == "__main__":
