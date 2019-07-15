@@ -417,6 +417,12 @@ def find_inverses(mainapp):
             final_sol=initial_sol.copy()
             final_sol[1:-1,1]=sol.x
 
+            # Save final solution to Outputs folder
+            final_df = pandas.DataFrame(final_sol)
+            final_df.columns = ['Time', 'Temperature']
+            save_location = 'Output/'+mainapp.page2.initsolutions.initial_labs[i].get()[:-4]+'_results_in_this_sol.csv'
+            final_df.to_csv(save_location, header=True, index=None)
+            
             # Calculate objective values and SSE
             final_res=calc_residuals(mainapp,final_sol,alpha)
             final_SSE=sum(final_res[0:-(m-2)]**2)
