@@ -7,14 +7,14 @@ from scipy import optimize
 import matplotlib.pyplot as plt
 import os
 
+
 # This is the main diffusion solver function that uses python, this results in a 3d array that has the
 # output at every timestep.
 def forwardmodel_slow(mainapp):
-
-    #read parameters and create loading bar
-    loadingbar=ttk.Progressbar(mainapp.page1.graphingframe, mode='determinate', length='2i', maximum=1000)
-    loadingbar.grid(row=20, column=0, padx=(5,0), pady=(50,5), sticky='sw')
-    params=mainapp.page1.forwardparams
+    # read parameters and create loading bar
+    loadingbar = ttk.Progressbar(mainapp.page1.graphingframe, mode='determinate', length='2i', maximum=1000)
+    loadingbar.grid(row=20, column=0, padx=(5, 0), pady=(50, 5), sticky='sw')
+    params = mainapp.page1.forwardparams
     mainapp.update()
 
     def fluxbal(z, e, f, h, j, k, l):
@@ -30,7 +30,6 @@ def forwardmodel_slow(mainapp):
         X = linalg.solve(A, B)
         return X
 
-
     # get user defined info
     ttot = float(params['ModelDuration'].get())
     dt = float(params['TimeStep'].get())
@@ -40,7 +39,7 @@ def forwardmodel_slow(mainapp):
     nmin = int(params['NumMinerals'].get())
     de = 100
 
-    cool_file=params['CoolingFile'].get()
+    cool_file = params['CoolingFile'].get()
     if params['CoolingType'].get() == "Custom":
         # read data in as matrix without using pandas
         file = open(cool_file, 'r', encoding='ISO-8859-1')
@@ -124,7 +123,6 @@ def forwardmodel_slow(mainapp):
             SA[m] = (4 * pi * pow(r[m], 2))
         else:
             SA[m] = 2 * L[m] * w[m]
-
 
         # initial conditions (starting concentration profiles)
         for m in range(0, nmin):
@@ -223,47 +221,42 @@ def forwardmodel_slow(mainapp):
         else:
             xresult[:, i] = 1e4 * linspace(dx[i], L[i] - dx[i], xsteps)
 
-    #print(systime.time() - start_time)
-    #print(array(xresult).shape)
-    #print(array(yresult).shape)
-    #print(array(timeresult).shape)
-
+    # print(systime.time() - start_time)
+    # print(array(xresult).shape)
+    # print(array(yresult).shape)
+    # print(array(timeresult).shape)
 
     return xresult, yresult, timeresult
 
 
 # This is the main diffusion solver that uses C, this results in a 2d array that has only the last time step.
-def forwardmodel_fast(file_param,cool_array):
+def forwardmodel_fast(file_param, cool_array):
+    unique_ID = 1
+    df = pandas.DataFrame(cool_array)
+    df.to_csv(str(unique_ID) + ".txt", sep=",", header=None, index=None)
 
-    print('file param {}'.format(file_param))
-    unique_ID=1
-    df=pandas.DataFrame(cool_array)
-    df.to_csv(str(unique_ID)+".txt", sep=",", header=None, index=None)
-    print('this is the command \n {}'.format("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt"))
-    os.system("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt")
+    os.system("./Cmodel/RunModel " + file_param + " " + str(unique_ID) + ".txt " + str(unique_ID) + "X.txt " + str(
+        unique_ID) + "Y.txt")
 
-    #now read input from C code output
-    X=pandas.read_csv(str(unique_ID)+"X.txt", sep=',', header=None).values
-    Y=pandas.read_csv(str(unique_ID)+"Y.txt", sep=',', header=None).values
+    # now read input from C code output
+    X = pandas.read_csv(str(unique_ID) + "X.txt", sep=',', header=None).values
+    Y = pandas.read_csv(str(unique_ID) + "Y.txt", sep=',', header=None).values
 
-    #remove text files that have been created
+    # remove text files that have been created
     os.system("rm 1.txt")
     os.system("rm 1Y.txt")
     os.system("rm 1X.txt")
 
-
     return X, Y
-
 
 
 # These are all the functions for computing the inverse solution
 def calc_single_diffs(xmod, ymod, error_file):
-
     # compute traverse for file
     def octrav(error_file):
         replacedat = pandas.read_csv(error_file, sep=' ', header=None).values
 
-        return replacedat[:,0], replacedat[:,1], replacedat[:,2]
+        return replacedat[:, 0], replacedat[:, 1], replacedat[:, 2]
 
     xactual, yactual, uncert = octrav(error_file)
 
@@ -273,163 +266,157 @@ def calc_single_diffs(xmod, ymod, error_file):
     yactual = yactual[ind_keep]
     uncert = uncert[ind_keep]
 
-    if len(ind_keep)>0:
+    if len(ind_keep) > 0:
         # find interpolation for each point
-        coef=interpolate.splrep(xmod,ymod)
-        y_corr=interpolate.splev(xactual,coef)
+        coef = interpolate.splrep(xmod, ymod)
+        y_corr = interpolate.splev(xactual, coef)
 
-        #return differences divided by sigma
-        diff = divide(y_corr-yactual,uncert)
+        # return differences divided by sigma
+        diff = divide(y_corr - yactual, uncert)
     else:
-        diff=[]
+        diff = []
 
     return list(diff)
 
 
-def calc_residuals(mainapp,cool_array,reg_alpha):
-
+def calc_residuals(mainapp, cool_array, reg_alpha):
     # record all difference from each mineral within each sample
-    D_total=[]
+    D_total = []
     for i in mainapp.page2.forwardmods:
 
         # if cool history has negative temps give high residuals
-        if any(cool_array[:,1]<100):
-            fakecool=array([[0,700],[1,500]])
+        if any(cool_array[:, 1] < 100):
+            fakecool = array([[0, 700], [1, 500]])
             xdata, ydata = forwardmodel_fast(mainapp.page2.forwardmodelframe.forwardmodels_var[i].get(), fakecool)
-            ydata = ydata+300
+            ydata = ydata + 300
         else:
             xdata, ydata = forwardmodel_fast(mainapp.page2.forwardmodelframe.forwardmodels_var[i].get(), cool_array)
 
-        for k in range(0,8):
-            error_file=mainapp.page2.errorfileframe.errfile_var[(i,k)].get()
+        for k in range(0, 8):
+            error_file = mainapp.page2.errorfileframe.errfile_var[(i, k)].get()
             if error_file:
-                D_total=D_total+calc_single_diffs(xdata[:,k],ydata[:,k],error_file)
+                D_total = D_total + calc_single_diffs(xdata[:, k], ydata[:, k], error_file)
 
-    residuals=array(D_total).reshape((-1,1))+(.33/25)*(499-min(min(cool_array[:,1]),499))**2
+    residuals = array(D_total).reshape((-1, 1)) + (.33 / 25) * (499 - min(min(cool_array[:, 1]), 499)) ** 2
 
     # compute regularization term for cooling history
     N = len(residuals)
     m = len(cool_array)
 
-    #create L matrix to be used as constraint, currently constructed to penalize 2nd derivative
-    L=zeros((m-2,m))
-    for i in range(0,m-2):
-        L[i,i:i+3]=[1, -2, 1]
+    # create L matrix to be used as constraint, currently constructed to penalize 2nd derivative
+    L = zeros((m - 2, m))
+    for i in range(0, m - 2):
+        L[i, i:i + 3] = [1, -2, 1]
 
-    #stack to make K vector
-    res=vstack((residuals,matmul(reg_alpha*L,cool_array[:,1]).reshape(-1,1)))
-    return res.reshape(N+m-2)
+    # stack to make K vector
+    res = vstack((residuals, matmul(reg_alpha * L, cool_array[:, 1]).reshape(-1, 1)))
+    return res.reshape(N + m - 2)
 
 
-def calc_jacob(mainapp,cool_array,curr_res,reg_alpha,past_SSE,past_aLm):
-
+def calc_jacob(mainapp, cool_array, curr_res, reg_alpha, past_SSE, past_aLm):
     # Calculate current sse and smoothness
-    m=len(cool_array)
-    curr_res=calc_residuals(mainapp,cool_array,reg_alpha)
-    curr_SSE=sum(curr_res[0:-(m-2)]**2)
-    curr_aLm=sum(curr_res[-(m-2):]**2)
+    m = len(cool_array)
+    curr_res = calc_residuals(mainapp, cool_array, reg_alpha)
+    curr_SSE = sum(curr_res[0:-(m - 2)] ** 2)
+    curr_aLm = sum(curr_res[-(m - 2):] ** 2)
     past_SSE.append(curr_SSE)
     past_aLm.append(curr_aLm)
 
     # Update progress figures
-    mainapp.page2.progwind.line11.set_data(cool_array[:,0],cool_array[:,1])
-    mainapp.page2.progwind.line12.set_data(cool_array[:,0],cool_array[:,1])
-    limx1, limx2 = min(cool_array[:,0]), max(cool_array[:,0])
-    limy1, limy2 = min(cool_array[:,1]), max(cool_array[:,1])
+    mainapp.page2.progwind.line11.set_data(cool_array[:, 0], cool_array[:, 1])
+    mainapp.page2.progwind.line12.set_data(cool_array[:, 0], cool_array[:, 1])
+    limx1, limx2 = min(cool_array[:, 0]), max(cool_array[:, 0])
+    limy1, limy2 = min(cool_array[:, 1]), max(cool_array[:, 1])
 
-    mainapp.page2.progwind.ax1.set_ylim([limy1-.03*limy2, 1.03*limy2])
-    mainapp.page2.progwind.ax1.set_xlim([limx1-.03*limx2, 1.03*limx2])
+    mainapp.page2.progwind.ax1.set_ylim([limy1 - .03 * limy2, 1.03 * limy2])
+    mainapp.page2.progwind.ax1.set_xlim([limx1 - .03 * limx2, 1.03 * limx2])
 
     # Update 30 most recent objective values into bar plot. The bar graph does not have a built in function
     # to update the number of entries.
-    num_iter=len(past_SSE)
-    if num_iter<31:
+    num_iter = len(past_SSE)
+    if num_iter < 31:
         for i in range(len(past_SSE)):
-            mainapp.page2.progwind.bar2[i].set_height(past_SSE[i]+past_aLm[i])
+            mainapp.page2.progwind.bar2[i].set_height(past_SSE[i] + past_aLm[i])
             mainapp.page2.progwind.bar2[i].set_height(past_SSE[i])
     else:
-        for i in range(num_iter-30,num_iter):
-            k = i+(num_iter-30)
-            mainapp.page2.progwind.bar2[i].set_height(past_SSE[k]+past_aLm[k])
+        for i in range(num_iter - 30, num_iter):
+            k = i + (num_iter - 30)
+            mainapp.page2.progwind.bar2[i].set_height(past_SSE[k] + past_aLm[k])
             mainapp.page2.progwind.bar2[i].set_height(past_SSE[k])
-
 
     mainapp.page2.progwind.canvas1.draw()
     mainapp.page2.progwind.canvas2.draw()
     mainapp.update()
 
-    N=len(curr_res)
-    deltac=1;
+    N = len(curr_res)
+    deltac = 1;
 
-    J=zeros([N,m-2])
-    for i in range(1,m-1):
-        mainapp.page2.progwind.calc_var.set("calculating Jacobian column "+str(i)+" of "+str(m-2))
+    J = zeros([N, m - 2])
+    for i in range(1, m - 1):
+        mainapp.page2.progwind.calc_var.set("calculating Jacobian column " + str(i) + " of " + str(m - 2))
         mainapp.update()
-        new_cool=cool_array.copy()
-        new_cool[i,1]=new_cool[i,1]+deltac
-        deriv=(calc_residuals(mainapp,new_cool,reg_alpha)-curr_res)/deltac
-        J[:,i-1]=deriv.reshape(N)
+        new_cool = cool_array.copy()
+        new_cool[i, 1] = new_cool[i, 1] + deltac
+        deriv = (calc_residuals(mainapp, new_cool, reg_alpha) - curr_res) / deltac
+        J[:, i - 1] = deriv.reshape(N)
 
     return J
 
 
 # This function runs the inverse solver for the minerals, initial profiles given
 def find_inverses(mainapp):
+    alpha = 0.04032227
 
-    alpha=0.04032227
-
-    for i in range(0,mainapp.page2.num_initials):
-        if (mainapp.page2.initsolutions.initial_vars[i].get()==1):
-            file_loc=mainapp.page2.initsolutions.folder_var.get()+mainapp.page2.initsolutions.initial_labs[i].get()
-            initial_sol=pandas.read_csv(file_loc, sep=',', header=None).values
-            m=len(initial_sol)
-
+    for i in range(0, mainapp.page2.num_initials):
+        if (mainapp.page2.initsolutions.initial_vars[i].get() == 1):
+            file_loc = mainapp.page2.initsolutions.folder_var.get() + mainapp.page2.initsolutions.initial_labs[i].get()
+            initial_sol = pandas.read_csv(file_loc, sep=',', header=None).values
+            m = len(initial_sol)
 
             # Calculate initial residuals and smoothness, and create progress plots that will be updated
             # each time the Jac function is called.
-            initial_res=calc_residuals(mainapp,initial_sol,alpha)
-            initial_SSE=sum(initial_res[0:-(m-2)]**2)
-            initial_aLm=sum(initial_res[-(m-2):]**2)
+            initial_res = calc_residuals(mainapp, initial_sol, alpha)
+            initial_SSE = sum(initial_res[0:-(m - 2)] ** 2)
+            initial_aLm = sum(initial_res[-(m - 2):] ** 2)
 
-            past_sse=[initial_SSE]
-            past_aLm=[initial_aLm]
-            mainapp.page2.create_progwind(mainapp,initial_sol,initial_SSE,initial_aLm)
-            mainapp.page2.progwind.init_var.set("Running LM algorithm with starting solution: /"+
+            past_sse = [initial_SSE]
+            past_aLm = [initial_aLm]
+            mainapp.page2.create_progwind(mainapp, initial_sol, initial_SSE, initial_aLm)
+            mainapp.page2.progwind.init_var.set("Running LM algorithm with starting solution: /" +
                                                 mainapp.page2.initsolutions.initial_labs[i].get())
-
-
-
 
             # Create residual and jacobian function that accepts single array as input (for built in optimize function)
             def usey_residuals(cool_y):
-                full_soln=initial_sol.copy()
-                full_soln[1:-1,1]=cool_y
+                full_soln = initial_sol.copy()
+                full_soln[1:-1, 1] = cool_y
                 return calc_residuals(mainapp, full_soln, alpha)
 
             def usey_jacob(soln_y):
-                full_soln=initial_sol.copy()
-                full_soln[1:-1,1]=soln_y
-                curr_res=calc_residuals(mainapp, full_soln, alpha)
+                full_soln = initial_sol.copy()
+                full_soln[1:-1, 1] = soln_y
+                curr_res = calc_residuals(mainapp, full_soln, alpha)
                 return calc_jacob(mainapp, full_soln, curr_res, alpha, past_sse, past_aLm)
 
             # Now find solution and convert it back into 2D array
-            initial_solny=initial_sol[1:-1,1].copy()
-            sol=optimize.least_squares(usey_residuals, initial_solny , jac=usey_jacob, method='lm', gtol=1e-9)
-            final_sol=initial_sol.copy()
-            final_sol[1:-1,1]=sol.x
+            initial_solny = initial_sol[1:-1, 1].copy()
+            sol = optimize.least_squares(usey_residuals, initial_solny, jac=usey_jacob, method='lm', gtol=1e-9)
+            final_sol = initial_sol.copy()
+            final_sol[1:-1, 1] = sol.x
+
+            # Save final solution to Outputs folder
+            final_df = pandas.DataFrame(final_sol)
+            final_df.columns = ['Time', 'Temperature']
+            save_location = 'Output/' + mainapp.page2.initsolutions.initial_labs[i].get()[
+                                        :-4] + '_results_in_this_sol.csv'
+            final_df.to_csv(save_location, header=True, index=None)
 
             # Calculate objective values and SSE
-            final_res=calc_residuals(mainapp,final_sol,alpha)
-            final_SSE=sum(final_res[0:-(m-2)]**2)
-            final_aLm=sum(final_res[-(m-2):]**2)
+            final_res = calc_residuals(mainapp, final_sol, alpha)
+            final_SSE = sum(final_res[0:-(m - 2)] ** 2)
+            final_aLm = sum(final_res[-(m - 2):] ** 2)
 
             # Get magnitude of final gradient function
-            K=calc_jacob(mainapp,final_sol,calc_residuals(mainapp,final_sol,alpha),alpha,past_sse,past_aLm)
-            Kmag=linalg.norm(matmul(transpose(K),final_res))
+            K = calc_jacob(mainapp, final_sol, calc_residuals(mainapp, final_sol, alpha), alpha, past_sse, past_aLm)
+            Kmag = linalg.norm(matmul(transpose(K), final_res))
             mainapp.page2.progwind.destroy()
-
-
-
-
-
 
