@@ -21,9 +21,9 @@ from eiler_SA.forwardmodeling_sa import make_params_dict, generate_synthetic_dat
 
 
 # root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
-root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
+root = '/home/gabriel/Documents/FGB_model/JohnEiler/modality_SF/plag_hornblende_sensitivity_SF/'
 
-rname = 'Eiler94_Amphibolite'
+rname = 'eiler94_p2_h8'
 
 # years in MA we want to see
 year_ma = [10, 20, 45]

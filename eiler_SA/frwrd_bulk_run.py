@@ -27,7 +27,9 @@ if __name__ == "__main__":
 
     # root path
     #root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
-    root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
+    # root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
+    root = '/home/gabriel/Documents/Euler_SA/euler_modality'
+    root = '/home/gabriel/Documents/FGB_model/JohnEiler/modality_SF/'
 
     for dir in os.listdir(root):
         print(dir)
