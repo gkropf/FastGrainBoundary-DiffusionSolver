@@ -365,7 +365,9 @@ def calc_jacob(mainapp, cool_array, curr_res, reg_alpha, past_SSE, past_aLm):
 
 # This function runs the inverse solver for the minerals, initial profiles given
 def find_inverses(mainapp):
-    alpha = 0.04032227
+    alpha = 0.04
+    alpha = 0.1
+    alpha = 0.001
 
     for i in range(0, mainapp.page2.num_initials):
         if (mainapp.page2.initsolutions.initial_vars[i].get() == 1):

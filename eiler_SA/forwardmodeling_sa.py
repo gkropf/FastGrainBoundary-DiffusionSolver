@@ -307,9 +307,9 @@ def generate_synthetic_data(x_arr, y_arr, noise, sample_locations, output_locati
     :return:
     """
 
-    print(x_arr)
-    print('noise {}'.format(noise))
-    print('sample locations {}'.format(sample_locations))
+    # print(x_arr)
+    # print('noise {}'.format(noise))
+    # print('sample locations {}'.format(sample_locations))
 
     print(x_arr.shape)
     print(y_arr.shape)
@@ -321,8 +321,8 @@ def generate_synthetic_data(x_arr, y_arr, noise, sample_locations, output_locati
         yvals.append(y_arr[min_indx])
         xvals.append(x_arr[min_indx])
 
-    print('yvals {}'.format(yvals))
-    print('xvals {}'.format(xvals))
+    # print('yvals {}'.format(yvals))
+    # print('xvals {}'.format(xvals))
 
     yvals = array(yvals)
     xvals = array(xvals)
@@ -330,10 +330,10 @@ def generate_synthetic_data(x_arr, y_arr, noise, sample_locations, output_locati
     # Add noise
     # random.normal(center of normal ditribution, std deviation of normal distribution, size of arr)
     noise_arr = random.normal(0.0, noise, len(yvals))
-    print('noise arr \n {}'.format(noise_arr))
+    # print('noise arr \n {}'.format(noise_arr))
     # you add the noise based on analytical uncertainty 0.28 (1st std dev) parts per thousand (less in the future)
     yvals_noise = yvals + noise_arr
-    print('noisy yvals \n {}'.format(yvals_noise))
+    # print('noisy yvals \n {}'.format(yvals_noise))
 
     uncertainty = full(noise_arr.shape, noise)
 
@@ -350,10 +350,17 @@ def generate_synthetic_data(x_arr, y_arr, noise, sample_locations, output_locati
     print('done writing to {}'.format(wfilepath))
 
 
+def sample_locator(x_arr):
+    """
+    
+    :param x_arr: distance along crystal lattice.
+    :return:
+    """
+
 if __name__ == "__main__":
 
     # path to the paramter style file
-    chloe_model_params = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/Eiler94_Amphibolite.txt'
+    chloe_model_params = r'/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/original_eiler/Eiler94_Amphibolite.txt'
 
     fwd_model_parameters = make_params_dict(params=chloe_model_params)
 

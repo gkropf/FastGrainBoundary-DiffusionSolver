@@ -28,12 +28,15 @@ if __name__ == "__main__":
     # root path
     #root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
     # root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
-    root = '/home/gabriel/Documents/Euler_SA/euler_modality'
-    root = '/home/gabriel/Documents/FGB_model/JohnEiler/modality_SF/'
+    # root = '/home/gabriel/Documents/Euler_SA/euler_modality'
+    # root = '/home/gabriel/Documents/FGB_model/JohnEiler/modality_SF/'
+    root = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/modality/sa_params/'
+    outroot = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/modality/modality_fwd_results/'
 
     for dir in os.listdir(root):
-        print(dir)
+        print('dir', dir)
         param_path = os.path.join(root, dir)
+        print('path', param_path)
 
         save_name = dir.split('.')[0]
 
@@ -43,6 +46,6 @@ if __name__ == "__main__":
         xresult, yresult, timeresult = forward_model_slow_bulk(fwd_model_params)
 
         # Save each array as a .npy file
-        save(os.path.join(root, '{}_x.npy'.format(save_name)), xresult)
-        save(os.path.join(root, '{}_y.npy'.format(save_name)), yresult)
-        save(os.path.join(root, '{}_time.npy'.format(save_name)), timeresult)
+        save(os.path.join(outroot, '{}_x.npy'.format(save_name)), xresult)
+        save(os.path.join(outroot, '{}_y.npy'.format(save_name)), yresult)
+        save(os.path.join(outroot, '{}_time.npy'.format(save_name)), timeresult)

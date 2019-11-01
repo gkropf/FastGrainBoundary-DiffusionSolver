@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from eiler_SA.forwardmodeling_sa import make_params_dict, generate_synthetic_data, write_params_file
 
 #root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
-root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
+root = r'/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/original_eiler/'
 
 # year in MA we want to see
 year_ma = 44
@@ -82,6 +82,7 @@ output_location = root
 
 name = 'Eiler94_Amphibolite_plag_lownoise'
 
+print('x plagioclase', x_plag)
 generate_synthetic_data(x_arr=x_plag, y_arr=y_plag, noise=0.01, sample_locations=plag_sample_locations,
                         output_location=output_location, output_name=name)
 
