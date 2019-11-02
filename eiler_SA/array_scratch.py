@@ -17,7 +17,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 # ============= standard library imports ========================
-from eiler_SA.forwardmodeling_sa import make_params_dict, generate_synthetic_data, write_params_file
+from eiler_SA.forwardmodeling_sa import make_params_dict, generate_synthetic_data, write_params_file, sample_locator
 
 #root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
 root = r'/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/original_eiler/'
@@ -80,10 +80,13 @@ mag_sample_locations = [400, 500, 600]
 
 output_location = root
 
+sample_locs = sample_locator(x_plag)
+print('sample locations \n', sample_locs)
+
 name = 'Eiler94_Amphibolite_plag_lownoise'
 
 print('x plagioclase', x_plag)
-generate_synthetic_data(x_arr=x_plag, y_arr=y_plag, noise=0.01, sample_locations=plag_sample_locations,
+generate_synthetic_data(x_arr=x_plag, y_arr=y_plag, noise=0.01, sample_locations=sample_locs,
                         output_location=output_location, output_name=name)
 
 

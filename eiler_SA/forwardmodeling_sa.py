@@ -23,7 +23,7 @@ import os
 # ============= standard library imports ========================
 from modelfunctions import forwardmodel_fast, forwardmodel_slow, find_inverses
 
-def forward_model_slow_bulk(params):
+def forward_model_slow_bulk(params, coolfile=False):
 
     """
     A forward model implementation that accepts a dictionary params based on a standard params .txt file
@@ -47,13 +47,21 @@ def forward_model_slow_bulk(params):
         return X
 
     # get user defined info TODO - remove .get() method
-    ttot = float(params['ModelDuration'])
-    dt = float(params['TimeStep'])
-    WRd180 = float(params['WholeRock'])
-    Tstart = float(params['StartingTemp'])
-    Tend = float(params['EndTemp'])
-    nmin = int(params['NumMinerals'])
-    de = 100
+    if not coolfile:
+        ttot = float(params['ModelDuration'])
+        dt = float(params['TimeStep'])
+        WRd180 = float(params['WholeRock'])
+        Tstart = float(params['StartingTemp'])
+        Tend = float(params['EndTemp'])
+        nmin = int(params['NumMinerals'])
+        de = 100
+    else:
+        WRd180 = float(params['WholeRock'])
+        Tstart = float(params['StartingTemp'])
+        Tend = float(params['EndTemp'])
+        dt = float(params['TimeStep'])
+        nmin = int(params['NumMinerals'])
+        de = 100
 
     cool_file = params['CoolingFile']
     print('cool file is {}'.format(cool_file))
@@ -352,10 +360,31 @@ def generate_synthetic_data(x_arr, y_arr, noise, sample_locations, output_locati
 
 def sample_locator(x_arr):
     """
-    
+
     :param x_arr: distance along crystal lattice.
-    :return:
+    :return: list of sample locations less than 20 microns apart
     """
+
+    x_arr = [i for i in x_arr]
+    sample_section = x_arr[1:-1]
+
+    sample_locations = []
+
+    for i in range(len(sample_section)):
+
+        if i < len(sample_section):
+            if i == 0:
+                sample_locations.append(sample_section[i])
+            if i +1 < len(sample_section):
+
+                if sample_section[i+1] - sample_section[i] < 10.0:
+                    break
+                elif sample_section[i+1] - sample_section[i] <= 20.0 and i != 0:
+                    # sample i+1
+                    sample_locations.append(sample_section[i])
+    return sample_locations
+
+
 
 if __name__ == "__main__":
 
