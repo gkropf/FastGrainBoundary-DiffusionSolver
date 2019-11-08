@@ -29,7 +29,7 @@ plag_length_start = 200.0
 
 horn_length_key = 'Min2-R'
 horn_length = float(fwd_model_parameters[horn_length_key])
-horn_length_start = 500.0
+horn_length_start = 1000.0
 
 lengthstep = 100.0
 # this will be the step by which we change the relative mode of plag to hornblende

@@ -368,6 +368,7 @@ def find_inverses(mainapp):
     alpha = 0.04
     alpha = 0.1
     alpha = 0.001
+    alpha = 0.07
 
     for i in range(0, mainapp.page2.num_initials):
         if (mainapp.page2.initsolutions.initial_vars[i].get() == 1):

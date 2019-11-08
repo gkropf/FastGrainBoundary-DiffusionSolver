@@ -30,8 +30,10 @@ if __name__ == "__main__":
     # root = '/home/dan/Documents/Eiler_94/plag_hornblende_sensitivity'
     # root = '/home/gabriel/Documents/Euler_SA/euler_modality'
     # root = '/home/gabriel/Documents/FGB_model/JohnEiler/modality_SF/'
-    root = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/mode_length_configs_cooling/'
-    outroot = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/modality/modality_len_results_fwd/'
+    # root = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/mode_length_configs_cooling/'
+    # outroot = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/modality/modality_len_results_fwd/'
+    root = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/mode_length_configs/'
+    outroot = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/modality/modality_fwd_results/'
 
     for dir in os.listdir(root):
         print('dir', dir)
@@ -42,8 +44,11 @@ if __name__ == "__main__":
 
         fwd_model_params = make_params_dict(params=param_path)
 
-        print('running the slow model')
-        xresult, yresult, timeresult = forward_model_slow_bulk(fwd_model_params, coolfile=True)
+        # print('running the slow model with a cooling file')
+        # xresult, yresult, timeresult = forward_model_slow_bulk(fwd_model_params, coolfile=True)
+
+        print('running the slow model with no cooling file')
+        xresult, yresult, timeresult = forward_model_slow_bulk(fwd_model_params)
 
         # Save each array as a .npy file
         save(os.path.join(outroot, '{}_x.npy'.format(save_name)), xresult)
