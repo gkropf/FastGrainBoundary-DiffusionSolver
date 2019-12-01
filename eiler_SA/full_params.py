@@ -21,7 +21,7 @@ plagioclase_mode_start = 0.1
 # 0.6 - base case
 hornb_mode_key = 'Min2-Mode'
 hornblende_mode = float(fwd_model_parameters[hornb_mode_key])
-hornblende_mode_start = 0.9
+hornblende_mode_start = 0.8
 
 plag_length_key = 'Min1-W'
 plag_length = float(fwd_model_parameters[plag_length_key])
@@ -29,11 +29,11 @@ plag_length_start = 200.0
 
 horn_length_key = 'Min2-R'
 horn_length = float(fwd_model_parameters[horn_length_key])
-horn_length_start = 1000.0
+horn_length_start = 10000.0
 
 lengthstep = 100.0
 # this will be the step by which we change the relative mode of plag to hornblende
-step = 0.1
+step = 0.05
 
 leng_div = int((max(horn_length_start, plag_length_start) - min(horn_length_start, plag_length_start))/lengthstep)
 

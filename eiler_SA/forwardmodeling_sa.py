@@ -66,11 +66,13 @@ def forward_model_slow_bulk(params, coolfile=False):
     cool_file = params['CoolingFile']
     print('cool file is {}'.format(cool_file))
     if params['CoolingType'] == "Custom":
+        print('custom cooling file!')
         # read data in as matrix without using pandas
         file = open(cool_file, 'r', encoding='ISO-8859-1')
         raw = file.read()
         raw_lines = raw.split('\n')
         raw_data = [x.split(',') for x in raw_lines[0:-1]]
+        # raw_data = [x.split(' ') for x in raw_lines[0:-1]]
         segs = array([[float(x) for x in y] for y in raw_data])
 
         # compute cooling steps

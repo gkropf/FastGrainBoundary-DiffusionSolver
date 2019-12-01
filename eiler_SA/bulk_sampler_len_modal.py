@@ -53,7 +53,6 @@ for j in range(leng_div + 1):
 
         print('plag mode: {}, hornb mode {}'.format(plag_mode, hornb_mode))
 
-        # now write to file
         filename = 'eiler94_p{}_h{}_pl{}_hl{}'.format(str(plag_mode)[-1], str(hornb_mode)[-1], int(plag_len), int(horn_len))
 
         vars = ['x', 'y']

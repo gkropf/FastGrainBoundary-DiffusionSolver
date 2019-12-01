@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # 0.6 - base case
     hornb_mode_key = 'Min2-Mode'
     hornblende_mode = float(fwd_model_parameters[hornb_mode_key])
-    hornblende_mode_start = 0.9
+    hornblende_mode_start = 0.8
 
     # this will be the step by which we change the relative mode of plag to hornblende
     step = 0.1

@@ -21,9 +21,10 @@ from eiler_SA.forwardmodeling_sa import make_params_dict, generate_synthetic_dat
 
 
 # root = '/Users/dcadol/Desktop/academic_docs_II/FGB_model/JohnEiler/plag_hornblende_sensitivity'
-root = '/home/gabriel/Documents/FGB_model/JohnEiler/modality_SF/plag_hornblende_sensitivity_SF/'
-
-rname = 'eiler94_p2_h8'
+# root = '/home/gabriel/Documents/FGB_model/JohnEiler/modality_SF/plag_hornblende_sensitivity_SF/'
+root = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/modality/modality_len_results_fwd/'
+rname = 'eiler94_p8_h2_pl400_hl300'
+param_root = '/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/mode_length_configs_cooling/'
 
 # years in MA we want to see
 year_ma = [10, 20, 45]
@@ -43,7 +44,7 @@ x_path = os.path.join(root, '{}_x.npy'.format(rname))
 y_path = os.path.join(root, '{}_y.npy'.format(rname))
 time_path = os.path.join(root, '{}_time.npy'.format(rname))
 
-param_path = os.path.join(root, '{}.txt'.format(rname))
+param_path = os.path.join(param_root, '{}.txt'.format(rname))
 param_dict = make_params_dict(param_path)
 
 x_arr = np.load(x_path)
