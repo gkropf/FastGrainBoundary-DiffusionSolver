@@ -6,6 +6,7 @@ from scipy import interpolate
 from scipy import optimize
 import matplotlib.pyplot as plt
 import os
+import subprocess
 
 # This is the main diffusion solver function that uses python, this results in a 3d array that has the
 # output at every timestep.
@@ -239,7 +240,12 @@ def forwardmodel_fast(file_param,cool_array):
     df=pandas.DataFrame(cool_array)
     df.to_csv(str(unique_ID)+".txt", sep=",", header=None, index=None)
 
-    os.system("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt")
+    # Check if RunModel has already been compiled or not, if not it compiles it.
+    if os.path.exists("./Cmodel/RunModel") == True:
+    	os.system("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt")
+    else:
+    	os.system("gcc -Wall -o ./Cmodel/RunModel ./Cmodel/RunForwardModel.c")
+    	os.system("./Cmodel/RunModel "+file_param+" "+str(unique_ID)+".txt "+str(unique_ID)+"X.txt "+str(unique_ID)+"Y.txt")
 
     #now read input from C code output
     X=pandas.read_csv(str(unique_ID)+"X.txt", sep=',', header=None).values
