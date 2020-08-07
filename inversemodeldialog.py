@@ -28,7 +28,7 @@ class InverseProgressWindow(tk.Toplevel):
         self.ax1.legend()
 
         self.canvas1 = FigureCanvasTkAgg(self.fig1,frame1)
-        self.canvas1.show()
+        self.canvas1.draw()
         self.canvas1.get_tk_widget().pack(side='top', fill='both', expand=1)
         self.canvas1._tkcanvas.pack(side='top', fill='both', expand=1)
         frame1.grid(row=2, column=0, padx=(10,10), pady=(5,10))
@@ -47,7 +47,7 @@ class InverseProgressWindow(tk.Toplevel):
         self.ax2.legend()
 
         self.canvas2 = FigureCanvasTkAgg(self.fig2, frame2)
-        self.canvas2.show()
+        self.canvas2.draw()
         self.canvas2.get_tk_widget().pack(side='top', fill='both', expand=1)
         self.canvas2._tkcanvas.pack(side='top', fill='both', expand=1)
         frame2.grid(row=2, column=1, padx=(10,10), pady=(5,10))
