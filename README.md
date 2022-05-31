@@ -1,3 +1,5 @@
+This is the up-to-date fork of the FGB model. You can find the original fork from Gabriel Kropf here: https://github.com/gkropf/FastGrainBoundary-DiffusionSolver
+
 # Oxygen Isotope Diffusion Solver
 
 This application simulates the Fast Grain Boundary (FGB) model for isotope diffusion. It provides a GUI interface for inputing all mineral parameters and provides several graphing options along with the ability to export the model solution data to a .csv file. Search menus are provided for convenient referencing of diffusion parameters and fractionation factors. 
