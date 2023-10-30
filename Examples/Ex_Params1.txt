@@ -1,5 +1,6 @@
 NumMinerals,4
-CoolingType,Linear
+CoolingFile,/home/gabriel/PycharmProjects/FastGrainBoundary-DiffusionSolver/sensitivity_analysis/cooling_file_GELP.txt
+CoolingType,Custom
 WholeRock,12.8
 ModelDuration,4.0
 StartingTemp,700
